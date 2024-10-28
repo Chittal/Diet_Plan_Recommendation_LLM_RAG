@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1000px; /* Maximum width to limit the size on larger screens */
+            height: 100vh;
+            border-radius: 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background-color: #343541;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .chatbox {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: #3c82f6;
+            color: white;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background-color: #eaeaea;
+            color: black;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            padding: 15px 30px;
+            background-color: #3c82f6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .chat-input button:hover {
+            background-color: #2f6de5;
+        }
+
+        .chatbox::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chatbox::-webkit-scrollbar-thumb {
+            background-color: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .chatbox::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        Chatbot
+    </div>
+
+    <div id="chatbox" class="chatbox">
+        <div class="message bot">Hello! I'm your chatbot. How can I assist you?</div>
+    </div>
+
+    <form id="chatForm" class="chat-input">
+        <input type="text" id="userMessage" placeholder="Type your message..." autocomplete="off" required>
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Scroll to the bottom of the chatbox to show the latest messages
+        function scrollToBottom() {
+            $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+        }
+
+        // Send user input to the chatbot and display the response
+        $('#chatForm').on('submit', function(event) {
+            event.preventDefault();
+
+            let userMessage = $('#userMessage').val().trim();
+            if (userMessage === "") return;
+
+            $('#chatbox').append('<div class="message user">' + userMessage + '</div>');
+            $('#userMessage').val(''); // Clear input field
+            scrollToBottom(); // Scroll chatbox to the bottom
+
+            $.ajax({
+                url: '/get_response',
+                type: 'POST',
+                data: { message: userMessage },
+                success: function(data) {
+                    $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
+                    scrollToBottom();
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
