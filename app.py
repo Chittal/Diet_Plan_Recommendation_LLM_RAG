@@ -1,21 +1,31 @@
 import os
 
 from flask import Flask, render_template, request, jsonify, session
-from llama2_chat import initialize_llm, get_llm_response
+from llama3_chat import initialize_llm, get_llm_response
+from langchain_community.llms import Ollama
 
 from dotenv import load_dotenv
-from huggingface_hub import login
+# from huggingface_hub import login
+
+
 
 # Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
+llm = Ollama(model="llama3.1:8b")
 
 # Accessing environment variables
-app.config['HUGGING_FACE_API_TOKEN'] = os.getenv('HUGGING_FACE_API_TOKEN')
-login(token=os.getenv('HUGGING_FACE_API_TOKEN'))
+# app.config['HUGGING_FACE_API_TOKEN'] = os.getenv('HUGGING_FACE_API_TOKEN')
+# login(token=os.getenv('HUGGING_FACE_API_TOKEN'))
 
-session['llm'] = initialize_llm()
+@app.before_request
+def before_request():
+    if 'chat_history' not in session:
+        session['chat_history'] = []
+    # if 'llm' not in session:
+    #     session['llm'] = initialize_llm()
 
 # A simple function to generate responses
 def chatbot_response(user_input):

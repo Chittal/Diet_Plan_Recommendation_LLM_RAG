@@ -7,7 +7,7 @@ from llama_index.core.prompts.prompts import SimpleInputPrompt
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core import Settings
 
-from vectorstore import create_or_retrieve_index
+from llama2_vectorstore import create_or_retrieve_index
 
 
 
