@@ -5,3 +5,4 @@ venv/
 .env
 storage/
 data/food_data/
+data/combined_food_data.csv
