@@ -13,7 +13,8 @@ from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langchain_community.vectorstores import Chroma
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
-db = chromadb.PersistentClient(path="./storage/chroma")
+db = chromadb.PersistentClient(path="storage/chroma")
+print("db=======================", db)
 
 def get_embedding():
     # import chromadb.utils.embedding_functions as embedding_functions
@@ -61,6 +62,8 @@ def create_collection_sentence_transormer(name):
               document_embedding = model.encode(text).tolist()
 
               # Store document with metadata in ChromaDB
+              print(text, "text")
+              print(category, "category")
               collection.add(
                   documents=[text],
                   embeddings=[document_embedding],
@@ -73,13 +76,17 @@ def create_collection_sentence_transormer(name):
 def query_sentence_transormer_collection(name, query_text, n_results=5):
     """Query the ChromaDB collection with a semantic search."""
     model = SentenceTransformer('all-MiniLM-L6-v2')
+    print(query_text)
     query_embedding = model.encode(query_text).tolist()
+    # print("query embedding", query_embedding)
     collection = db.get_collection(name=name)
+    print(collection, name)
+    print(len(collection.get()), "collection length")
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=n_results
     )
-    print(results)
+    print(results, "result")
     # for document, metadata in zip(results['documents'][0], results['metadatas'][0]):
     #     print(f"Filename: {metadata['filename']}\nContent: {document}\n")
     return results['metadatas']
@@ -163,6 +170,9 @@ def create_collection(name):
 
 
 if __name__ == '__main__':
-    create_collection('disease')
-    create_collection('diet_plan')
-    # list_all_collections()
+    # create_collection('disease')
+    # create_collection('diet_plan')
+    query = "My age is 66years, height is 5.7ft and weight is 120 pounds. I have vomiting and loss of appetite. Suggest some diet plans."
+    response = query_sentence_transormer_collection("disease", query, n_results=1)
+    print(response)
+    list_all_collections()

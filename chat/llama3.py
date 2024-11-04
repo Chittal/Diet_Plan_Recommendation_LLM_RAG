@@ -22,7 +22,10 @@ def initialize_llm():
 def get_llm_response(query, llm):
     raw_prompt = PromptTemplate.from_template(
         """ 
-        <s>[INST] You are a technical assistant good at searching docuemnts. If you do not have an answer from the provided information say so. [/INST] </s>
+        <s>[INST] You are a nutrition AI assistant and your task is to suggest only diet plans. Below are the rules you need to follow:
+            - The input query will contain user disease explained in a paragraph.
+            - Consider disease and suggest diet plans to user using the context provided.
+            NO PREAMBLE. [/INST] </s>
         [INST] {input}
             Context: {context}
             Answer:
@@ -56,8 +59,8 @@ def get_llm_response(query, llm):
     # result = chain.invoke({"input": query})
     result = retrieval_chain.invoke({"input": query})
     print(result["answer"])
-    session['chat_history'].append(HumanMessage(content=query))
-    session['chat_history'].append(AIMessage(content=result["answer"]))
+    session['chat_history'].append({"role": "human", "content": query})
+    session['chat_history'].append({"role": "ai", "content": result["answer"]})
 
     sources = []
     for doc in result["context"]:

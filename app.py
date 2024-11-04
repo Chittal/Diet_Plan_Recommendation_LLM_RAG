@@ -35,23 +35,23 @@ def home():
 
 @app.route('/get_response', methods=['POST'])
 def get_response():
-    if session['current_state'] == 'start':
-        age = request.form.get('age')
-        weight = request.form.get('weight')
-        height = request.form.get('height')
-        option = request.form.get('option')
-        condition = request.form.get('condition')
-        if option == 'disease':
-            disease = condition
-        else:
-            disease = find_disease(age, height, weight, condition)
-        print(disease, "diseaase")
-        session['current_state'] = 'question'
-        response = chatbot_response(disease, llm)
-        print(response)
+    # if session['current_state'] == 'start':
+    age = request.form.get('age')
+    weight = request.form.get('weight')
+    height = request.form.get('height')
+    option = request.form.get('option')
+    condition = request.form.get('condition')
+    if option == 'disease':
+        disease = condition
     else:
-        user_input = request.form['message']
-        response = chatbot_response(user_input, llm)
+        disease = find_disease(age, height, weight, condition)
+    print(disease, "diseaase")
+    # session['current_state'] = 'question'
+    response = chatbot_response(disease, llm)
+    print(response)
+    # else:
+        # user_input = request.form['message']
+        # response = chatbot_response(user_input, llm)
     return jsonify({'response': response})
 
 if __name__ == '__main__':
