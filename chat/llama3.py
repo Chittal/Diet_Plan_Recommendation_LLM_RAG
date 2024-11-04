@@ -11,7 +11,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-from vectorstore import get_vector_store_retriever
+from vectordb_code.vectorstore import get_vector_store_retriever
 
 
 def initialize_llm():

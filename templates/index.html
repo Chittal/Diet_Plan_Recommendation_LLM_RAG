@@ -114,55 +114,110 @@
         .chatbox::-webkit-scrollbar-track {
             background-color: #f1f1f1;
         }
+        #age, #weight, #height {
+            width: 50px;
+        }
     </style>
 </head>
 <body>
-
-<div class="chat-container">
-    <div class="chat-header">
-        Chatbot
+    <div class="chat-container">
+        <div class="chat-header">
+            Chatbot
+        </div>
+    
+        <div id="chatbox" class="chatbox">
+            <div class="message bot">Hello! I'm here to help you create a diet plan tailored to your needs. How do you want to create diet plans?</div>
+            <div class="button-container">
+                <button class="response-btn" data-value="disease">Disease</button>
+                <button class="response-btn" data-value="symptoms">Symptoms</button>
+            </div>
+        </div>
+    
+        <form id="infoForm" class="chat-input" style="display:none;">
+            <input type="text" id="condition" placeholder="Enter Disease or Symptoms" required>
+            <input type="number" id="age" placeholder="Age" required>
+            <input type="number" id="weight" placeholder="Weight (kg)" required>
+            <input type="number" id="height" placeholder="Height (cm)" required>
+            <button type="submit">Submit</button>
+        </form>
+    
+        <form id="chatForm" class="chat-input" style="display:none;">
+            <input type="text" id="userMessage" placeholder="Type your message..." autocomplete="off" required>
+            <button type="submit">Send</button>
+        </form>
     </div>
-
-    <div id="chatbox" class="chatbox">
-        <div class="message bot">Hello! I'm your chatbot. How can I assist you?</div>
-    </div>
-
-    <form id="chatForm" class="chat-input">
-        <input type="text" id="userMessage" placeholder="Type your message..." autocomplete="off" required>
-        <button type="submit">Send</button>
-    </form>
-</div>
-
-<script>
-    $(document).ready(function() {
-        // Scroll to the bottom of the chatbox to show the latest messages
-        function scrollToBottom() {
-            $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
-        }
-
-        // Send user input to the chatbot and display the response
-        $('#chatForm').on('submit', function(event) {
-            event.preventDefault();
-
-            let userMessage = $('#userMessage').val().trim();
-            if (userMessage === "") return;
-
-            $('#chatbox').append('<div class="message user">' + userMessage + '</div>');
-            $('#userMessage').val(''); // Clear input field
-            scrollToBottom(); // Scroll chatbox to the bottom
-
-            $.ajax({
-                url: '/get_response',
-                type: 'POST',
-                data: { message: userMessage },
-                success: function(data) {
-                    $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
-                    scrollToBottom();
-                }
+    
+    <script>
+        let selectedOption = "";
+        $(document).ready(function() {
+            function scrollToBottom() {
+                $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+            }
+    
+            // Handle button clicks for Disease and Symptoms
+            $('.response-btn').on('click', function() {
+                selectedOption = $(this).data('value');
+                $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
+                $('#chatbox').append('<div class="message bot">Please enter the ' + selectedOption + ' along with your age, weight, and height.</div>')
+                $('.button-container').hide(); // Hide buttons after selection
+                $('#infoForm').show(); // Show input form for condition, age, weight, height
+                scrollToBottom(); // Scroll chatbox to the bottom
+            });
+    
+            // Handle form submission for condition, age, weight, height
+            $('#infoForm').on('submit', function(event) {
+                event.preventDefault();
+    
+                let condition = $('#condition').val().trim();
+                let age = $('#age').val();
+                let weight = $('#weight').val();
+                let height = $('#height').val();
+    
+                $('#chatbox').append('<div class="message user">Condition: ' + condition + ', Age: ' + age + ', Weight: ' + weight + 'kg, Height: ' + height + 'cm</div>');
+    
+                // Optionally, you can send the data to the server if needed
+                $.ajax({
+                    url: '/get_response',
+                    type: 'POST',
+                    data: {
+                        option: selectedOption,
+                        condition: condition,
+                        age: age,
+                        weight: weight,
+                        height: height
+                    },
+                    success: function(data) {
+                        $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
+                        scrollToBottom();
+                    }
+                });
+                $('#infoForm').hide(); // Hide the info form after submission
+                $('#chatForm').show(); // Show the chat form again for further interaction
+            });
+            
+            // Handle message submission
+            $('#chatForm').on('submit', function(event) {
+                event.preventDefault();
+    
+                let userMessage = $('#userMessage').val().trim();
+                if (userMessage === "") return;
+    
+                $('#chatbox').append('<div class="message user">' + userMessage + '</div>');
+                $('#userMessage').val(''); // Clear input field
+                scrollToBottom(); // Scroll chatbox to the bottom
+    
+                $.ajax({
+                    url: '/get_response',
+                    type: 'POST',
+                    data: { message: userMessage },
+                    success: function(data) {
+                        $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
+                        scrollToBottom();
+                    }
+                });
             });
         });
-    });
-</script>
-
-</body>
-</html>
+    </script>
+    
+    </body>
+    </html>
