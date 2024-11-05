@@ -2,7 +2,10 @@ from chat.llama3 import get_llm_response
 from flask import session
 
 def chatbot_response(user_input, llm):
-    return get_llm_response(user_input, llm)
+    # return "diet plan"
+    resp = get_llm_response(user_input, llm)
+    # print(resp)
+    return resp
     # # Manage state based responses
     # state = session['current_state']
     # print(state)

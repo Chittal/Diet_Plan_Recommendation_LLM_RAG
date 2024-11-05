@@ -153,7 +153,50 @@
             function scrollToBottom() {
                 $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
             }
-    
+            // Handle "Yes" response for questions
+        $(document).on('click', '.question-response-btn-yes', function() {
+            selectedOption = $(this).data('value');
+            $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
+            $('#chatbox').append('<div class="message bot">Please enter your queries.</div>')
+            $('#chatForm').show();
+            scrollToBottom();
+            $('.question-button-container').hide(); // Hide buttons after selection
+        });
+
+        // Handle "No" response for questions
+        $(document).on('click', '.question-response-btn-no', function() {
+            selectedOption = $(this).data('value');
+            $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
+            $('#chatbox').append('<div class="message bot">Would you like to generate another diet plan?</div>');
+            $('#chatbox').append(`
+                <div class="another-plan-button-container">
+                    <button class="another-plan-response-btn-yes" data-value="Yes">Yes</button>
+                    <button class="another-plan-response-btn-no" data-value="No">No</button>
+                </div>
+            `);
+            scrollToBottom();
+            $('.question-button-container').hide(); // Hide buttons after selection
+        });
+
+        // Handle "Yes" response for another diet plan
+        $(document).on('click', '.another-plan-response-btn-yes', function() {
+            selectedOption = $(this).data('value');
+            $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
+            $('#chatbox').append('<div class="message bot">How do you want diet plans? (Choose Disease or Symptoms)</div>');
+            $('.another-plan-button-container').hide(); // Hide buttons after selection
+            $('.button-container').show(); // Show initial options again for new plan
+            scrollToBottom();
+        });
+
+        // Handle "No" response for another diet plan
+        $(document).on('click', '.another-plan-response-btn-no', function() {
+            selectedOption = $(this).data('value');
+            $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
+            $('#chatbox').append('<div class="message bot">Thank you for using our app. Have a nice day!</div>');
+            scrollToBottom();
+            $('.another-plan-button-container').hide(); // Hide buttons after selection
+        });
+
             // Handle button clicks for Disease and Symptoms
             $('.response-btn').on('click', function() {
                 selectedOption = $(this).data('value');
@@ -163,7 +206,6 @@
                 $('#infoForm').show(); // Show input form for condition, age, weight, height
                 scrollToBottom(); // Scroll chatbox to the bottom
             });
-    
             // Handle form submission for condition, age, weight, height
             $('#infoForm').on('submit', function(event) {
                 event.preventDefault();
@@ -188,13 +230,20 @@
                     },
                     success: function(data) {
                         $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
+                        $('#chatbox').append('<div class="message bot"> Do you have any other questions? </div>');
+                        $('#chatbox').append(`
+                            <div class="question-button-container">
+                                <button class="question-response-btn-yes" data-value="Yes">Yes</button>
+                                <button class="question-response-btn-no" data-value="No">No</button>
+                            </div>
+                        `);
                         scrollToBottom();
                     }
                 });
                 $('#infoForm').hide(); // Hide the info form after submission
-                $('#chatForm').show(); // Show the chat form again for further interaction
+                // $('#chatForm').show(); // Show the chat form again for further interaction
             });
-            
+
             // Handle message submission
             $('#chatForm').on('submit', function(event) {
                 event.preventDefault();

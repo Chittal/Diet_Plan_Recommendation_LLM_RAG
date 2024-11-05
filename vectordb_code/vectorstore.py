@@ -62,7 +62,8 @@ def create_collection_sentence_transormer(name):
               document_embedding = model.encode(text).tolist()
 
               # Store document with metadata in ChromaDB
-              print(text, "text")
+            #   print(text, "text")
+              print(file_path, "file_path")
               print(category, "category")
               collection.add(
                   documents=[text],
@@ -170,9 +171,12 @@ def create_collection(name):
 
 
 if __name__ == '__main__':
-    # create_collection('disease')
-    # create_collection('diet_plan')
+    list_all_collections()
+    create_collection('disease')
+    create_collection('diet_plan')
     query = "My age is 66years, height is 5.7ft and weight is 120 pounds. I have vomiting and loss of appetite. Suggest some diet plans."
     response = query_sentence_transormer_collection("disease", query, n_results=1)
     print(response)
     list_all_collections()
+    collection = db.get_collection(name='disease')
+    print(collection.get(), "================disease")
