@@ -2,28 +2,38 @@ import os
 import fitz
 import chromadb
 
-from flask import session
-
-from llama_index.core import SimpleDirectoryReader
+from flask import session, g
 
 from langchain_community.document_loaders import PDFPlumberLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langchain_community.vectorstores import Chroma
-from llama_index.vector_stores.chroma import ChromaVectorStore
 
-db = chromadb.PersistentClient(path="storage/chroma")
-print("db=======================", db)
+from llama_index.core import SimpleDirectoryReader
+
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext
+from llama_index.vector_stores.chroma import ChromaVectorStore
+from sentence_transformers import SentenceTransformer
+from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+
+from llama_index.core import Settings
+
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+
+def get_db():
+    db = chromadb.PersistentClient(path="storage/chroma")
+    # try:
+    #     db = g.db
+    # except:
+    #     db = chromadb.PersistentClient(path="storage/chroma")
+    return db
+
 
 def get_embedding():
-    # import chromadb.utils.embedding_functions as embedding_functions
-    # huggingface_ef = embedding_functions.HuggingFaceEmbeddingFunction(
-    #     api_key=os.getenv('HUGGING_FACE_API_TOKEN'),
-    #     model_name="sentence-transformers/all-MiniLM-L6-v2"
-    # )
-    # return huggingface_ef
-    return FastEmbedEmbeddings()
+    huggingface_ef = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
+    return huggingface_ef
 
 def extract_text_from_pdf(file_path):
   with fitz.open(file_path) as pdf_document:
@@ -39,12 +49,11 @@ def get_category_from_path(file_path):
     return folder_name
 
 
-
 def create_collection_sentence_transormer(name):
     # Load the Sentence Transformer model for disease
-    model = SentenceTransformer('all-MiniLM-L6-v2')
     # Initialize ChromaDB
     base_dir = 'data/' + name
+    db = get_db()
     collection = db.get_or_create_collection(name=name)
 
     for root, dirs, files in os.walk(base_dir):
@@ -76,18 +85,18 @@ def create_collection_sentence_transormer(name):
 
 def query_sentence_transormer_collection(name, query_text, n_results=5):
     """Query the ChromaDB collection with a semantic search."""
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    print(query_text)
+    # print(query_text)
+    db = get_db()
     query_embedding = model.encode(query_text).tolist()
     # print("query embedding", query_embedding)
     collection = db.get_collection(name=name)
-    print(collection, name)
-    print(len(collection.get()), "collection length")
+    # print(collection, name)
+    # print(len(collection.get()), "collection length")
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=n_results
     )
-    print(results, "result")
+    # print(results, "result")
     # for document, metadata in zip(results['documents'][0], results['metadatas'][0]):
     #     print(f"Filename: {metadata['filename']}\nContent: {document}\n")
     return results['metadatas']
@@ -146,10 +155,12 @@ def get_vector_store_retriever(name):
 
 
 def list_all_collections():
+    db = get_db()
     print(f"Available collections: {db.list_collections()}")
 
 
 def delete_collection(collection_name):
+    db = get_db()
     try:
         db.delete_collection(collection_name)
         print(f"Collection '{collection_name}' has been deleted successfully.")
@@ -159,24 +170,62 @@ def delete_collection(collection_name):
 # delete_collection("diet_plan")
 
 
+def create_index(name):
+    db = get_db()
+    chroma_collection = db.get_or_create_collection(name)
+    documents = SimpleDirectoryReader("data/" + name, recursive=True).load_data()
+    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    Settings.embed_model = get_embedding()
+    index = VectorStoreIndex.from_documents(documents, storage_context=storage_context, show_progress=True)
+    retriever = index.as_retriever()
+    return retriever
+
+
+def retrieve_index(name):
+    # fetch documents and index from storage
+    # db = get_db()
+    # chroma_collection = db.get_collection(name=name)
+    # chroma_vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+    # Settings.embed_model = get_embedding()
+    # index = VectorStoreIndex.from_vector_store(vector_store=chroma_vector_store)
+    # retriever = index.as_retriever(search_type="similarity_score_threshold",
+    #     search_kwargs={
+    #         "k": 20,
+    #         "score_threshold": 0.1,
+    #     },)
+    # return retriever
+    vector_store = Chroma(persist_directory='storage/chroma', embedding_function=get_embedding(), collection_name=name)
+
+    print("Creating chain with collection")
+
+    # Set up retriever with the Chroma collection
+    retriever = vector_store.as_retriever(
+        search_type="similarity_score_threshold",
+        search_kwargs={
+            "k": 20,
+            "score_threshold": 0.1,
+        },
+    )
+    return retriever
+
+
 def create_collection(name):
+    db = get_db()
+    print('here db ')
     try:
         db.get_collection(name=name)
     except:
         if name == 'disease':
+            print('creating disease')
             create_collection_sentence_transormer(name)
-            print("done")
+            print("disease done")
         else:
-            create_collection_fast_embedding(name)
+            print('creating diet')
+            create_index(name)
 
 
 if __name__ == '__main__':
-    list_all_collections()
     create_collection('disease')
     create_collection('diet_plan')
-    query = "My age is 66years, height is 5.7ft and weight is 120 pounds. I have vomiting and loss of appetite. Suggest some diet plans."
-    response = query_sentence_transormer_collection("disease", query, n_results=1)
-    print(response)
     list_all_collections()
-    collection = db.get_collection(name='disease')
-    print(collection.get(), "================disease")

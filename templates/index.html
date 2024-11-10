@@ -114,9 +114,9 @@
         .chatbox::-webkit-scrollbar-track {
             background-color: #f1f1f1;
         }
-        #age, #weight, #height {
+        /*#age, #weight, #height {
             width: 50px;
-        }
+        }*/
     </style>
 </head>
 <body>
@@ -135,9 +135,9 @@
     
         <form id="infoForm" class="chat-input" style="display:none;">
             <input type="text" id="condition" placeholder="Enter Disease or Symptoms" required>
-            <input type="number" id="age" placeholder="Age" required>
+            <!-- <input type="number" id="age" placeholder="Age" required>
             <input type="number" id="weight" placeholder="Weight (kg)" required>
-            <input type="number" id="height" placeholder="Height (cm)" required>
+            <input type="number" id="height" placeholder="Height (cm)" required> -->
             <button type="submit">Submit</button>
         </form>
     
@@ -157,6 +157,7 @@
         $(document).on('click', '.question-response-btn-yes', function() {
             selectedOption = $(this).data('value');
             $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
+            selectedOption = 'plan_query'
             $('#chatbox').append('<div class="message bot">Please enter your queries.</div>')
             $('#chatForm').show();
             scrollToBottom();
@@ -182,6 +183,7 @@
         $(document).on('click', '.another-plan-response-btn-yes', function() {
             selectedOption = $(this).data('value');
             $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
+            selectedOption = "another_plan"
             $('#chatbox').append('<div class="message bot">How do you want diet plans? (Choose Disease or Symptoms)</div>');
             $('.another-plan-button-container').hide(); // Hide buttons after selection
             $('.button-container').show(); // Show initial options again for new plan
@@ -201,7 +203,8 @@
             $('.response-btn').on('click', function() {
                 selectedOption = $(this).data('value');
                 $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
-                $('#chatbox').append('<div class="message bot">Please enter the ' + selectedOption + ' along with your age, weight, and height.</div>')
+                $('#chatbox').append('<div class="message bot">Please enter the ' + selectedOption + '.</div>')
+                // $('#chatbox').append('<div class="message bot">Please enter the ' + selectedOption + ' along with your age, weight, and height.</div>')
                 $('.button-container').hide(); // Hide buttons after selection
                 $('#infoForm').show(); // Show input form for condition, age, weight, height
                 scrollToBottom(); // Scroll chatbox to the bottom
@@ -211,11 +214,12 @@
                 event.preventDefault();
     
                 let condition = $('#condition').val().trim();
-                let age = $('#age').val();
-                let weight = $('#weight').val();
-                let height = $('#height').val();
+                // let age = $('#age').val();
+                // let weight = $('#weight').val();
+                // let height = $('#height').val();
     
-                $('#chatbox').append('<div class="message user">Condition: ' + condition + ', Age: ' + age + ', Weight: ' + weight + 'kg, Height: ' + height + 'cm</div>');
+                // $('#chatbox').append('<div class="message user">Condition: ' + condition + ', Age: ' + age + ', Weight: ' + weight + 'kg, Height: ' + height + 'cm</div>');
+                $('#chatbox').append('<div class="message user">Condition: ' + condition + '.</div>');
     
                 // Optionally, you can send the data to the server if needed
                 $.ajax({
@@ -224,9 +228,9 @@
                     data: {
                         option: selectedOption,
                         condition: condition,
-                        age: age,
-                        weight: weight,
-                        height: height
+                        // age: age,
+                        // weight: weight,
+                        // height: height
                     },
                     success: function(data) {
                         $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
@@ -258,9 +262,16 @@
                 $.ajax({
                     url: '/get_response',
                     type: 'POST',
-                    data: { message: userMessage },
+                    data: { option: selectedOption, message: userMessage },
                     success: function(data) {
                         $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
+                        $('#chatbox').append('<div class="message bot"> Do you have any other questions? </div>');
+                        $('#chatbox').append(`
+                            <div class="question-button-container">
+                                <button class="question-response-btn-yes" data-value="Yes">Yes</button>
+                                <button class="question-response-btn-no" data-value="No">No</button>
+                            </div>
+                        `);
                         scrollToBottom();
                     }
                 });
