@@ -31,3 +31,15 @@ Button: Yes, No
 Then loop to 1
 13. Another diet plan - No
 Thank you!
+
+
+
+======================================
+Tasks
+-------------------------------------
+1. convert nutrients to dict amount and unit then fetch from postgres
+2. Loading symbol
+3. Try to ask prompt to combine documents (Bring same result for same query)
+4. Find symptom based retriever for each disease
+5. Beautify plan response
+6. Fix prompt to think on own for followup questions
