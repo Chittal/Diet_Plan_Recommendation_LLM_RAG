@@ -133,6 +133,7 @@ def chatbot_response(user_input, llm, option):
     if option == "plan_query":
         prompt = plan_query_prompt()
         resp = get_llm_response_history_aware(raw_prompt=prompt, query=user_input, retriever=retriever, llm=llm)
+        # resp = get_no_llm_response()
     else:
         # with open('disease_description.json', 'r') as f:
         #     disease_description = json.load(f)  # Load the JSON data into a Python dictionary

@@ -261,7 +261,9 @@
                     },
                     success: function(data) {
                         hideTypingIndicator();
-                        $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
+                        var formattedResponse = data.response.replace(/\n/g, '<br>');
+                        formattedResponse = formattedResponse.replace(/Foods to include:/g, '<strong>Foods to include:</strong>').replace(/Foods to avoid:/g, '<strong>Foods to avoid:</strong>');
+                        $('#chatbox').append('<div class="message bot">' + formattedResponse + '</div>');
                         $('#chatbox').append('<div class="message bot"> Do you have any other questions? </div>');
                         $('#chatbox').append(`
                             <div class="question-button-container">

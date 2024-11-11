@@ -24,7 +24,7 @@ def get_nutrients_data(nutrient_list):
     
     # Query to get items with specified nutrients
     query = f"""
-        SELECT food_name
+        SELECT INITCAP(food_name)
         FROM {tablename}
         WHERE LOWER(nutrient) IN %s LIMIT 10;
     """
