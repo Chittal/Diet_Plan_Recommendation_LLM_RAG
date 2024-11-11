@@ -114,9 +114,20 @@
         .chatbox::-webkit-scrollbar-track {
             background-color: #f1f1f1;
         }
+        .dot-flash::after {
+            content: '.';
+            animation: dot-flash 1s steps(5, end) infinite;
+        }
+        @keyframes dot-flash {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
         /*#age, #weight, #height {
             width: 50px;
         }*/
+        
     </style>
 </head>
 <body>
@@ -149,6 +160,20 @@
     
     <script>
         let selectedOption = "";
+        function showTypingIndicator() {
+            // Remove any existing typing indicator
+            $('#typing-indicator').remove();
+
+            // Create the typing indicator element
+            const typingIndicator = $('<div id="typing-indicator" class="typing-indicator"><div class="message bot">Typing<span class="dot-flash">...</span></div></div>');
+
+            // Append it to the chatbox, after the last message
+            $('#chatbox').append(typingIndicator);
+        }
+
+        function hideTypingIndicator() {
+            $('#typing-indicator').remove();
+        }
         $(document).ready(function() {
             function scrollToBottom() {
                 $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
@@ -223,6 +248,7 @@
                 $('#chatbox').append('<div class="message user">Condition: ' + condition + '.</div>');
     
                 // Optionally, you can send the data to the server if needed
+                showTypingIndicator();
                 $.ajax({
                     url: '/get_response',
                     type: 'POST',
@@ -234,6 +260,7 @@
                         // height: height
                     },
                     success: function(data) {
+                        hideTypingIndicator();
                         $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
                         $('#chatbox').append('<div class="message bot"> Do you have any other questions? </div>');
                         $('#chatbox').append(`
@@ -242,6 +269,11 @@
                                 <button class="question-response-btn-no" data-value="No">No</button>
                             </div>
                         `);
+                        scrollToBottom();
+                    },
+                    error: function() {
+                        hideTypingIndicator();
+                        $('#chatbox').append('<div class="message bot">An error occurred. Please try again.</div>');
                         scrollToBottom();
                     }
                 });
@@ -258,6 +290,7 @@
     
                 $('#chatbox').append('<div class="message user">' + userMessage + '</div>');
                 $('#userMessage').val(''); // Clear input field
+                showTypingIndicator();
                 scrollToBottom(); // Scroll chatbox to the bottom
     
                 $.ajax({
@@ -265,6 +298,7 @@
                     type: 'POST',
                     data: { option: selectedOption, message: userMessage },
                     success: function(data) {
+                        hideTypingIndicator();
                         $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
                         $('#chatbox').append('<div class="message bot"> Do you have any other questions? </div>');
                         $('#chatbox').append(`
@@ -273,6 +307,11 @@
                                 <button class="question-response-btn-no" data-value="No">No</button>
                             </div>
                         `);
+                        scrollToBottom();
+                    },
+                    error: function() {
+                        hideTypingIndicator();
+                        $('#chatbox').append('<div class="message bot">An error occurred. Please try again.</div>');
                         scrollToBottom();
                     }
                 });

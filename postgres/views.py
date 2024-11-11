@@ -20,12 +20,13 @@ def get_nutrients_data(nutrient_list):
 
     # Convert nutrient_list to a SQL-friendly string (assuming they are column names or keywords)
     nutrients_tuple = tuple(nutrient_list)
+    print(nutrients_tuple)
     
     # Query to get items with specified nutrients
     query = f"""
         SELECT food_name
         FROM {tablename}
-        WHERE nutrient IN %s LIMIT 10;
+        WHERE LOWER(nutrient) IN %s LIMIT 10;
     """
     print(query)
     

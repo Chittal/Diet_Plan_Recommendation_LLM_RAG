@@ -48,17 +48,24 @@ def get_diet_plan_prompt():
 
         Output: 
         Your output should be in JSON format containg following elements with specified key.
-        1. nutrients_recommended - Recommend nutrients for the patient. Example - Protein - 20g, carbohydrate - 10g etc. 
+        1. nutrients_recommended - Recommend nutrients for the patient. Example - Protein - 20g, carbohydrate - 10g etc. It has to be list of objects with nutrient, amount, and unit.
         2. diet_plan_summary - Provide a very detailed explanation of diet plan for user in a paragraph. Also, include recommended foods, foods to avoid, and specific nutrient levels.
         3. foods_avoid - List with foods to avoid if any.
 
-        Strictly follow the below sample output format enclosed in <sample_output>
-        Sample output:
+        Strictly follow the datatypes and structure of the below sample output format enclosed in <sample_output>
         {{
-            "nutrients_recommended": {{
-                "protein": "10g",
-                "carbohydrate": 20g
-            }},
+            "nutrients_recommended": [
+            {
+            "nutrient": "protein", 
+            "amount": "10", 
+            "unit": "g"
+            }, 
+            {
+            "nutrient": "carbohydrate", 
+            "amount": "20", 
+            "unit": "g"
+            }
+            ],
             "diet_plan_summary": "Reduce carbohydrate intake for individuals with Type 2 Diabetes (T2D) has been shown to improve blood glucose. Emphasize consumption of non-starchy vegetables, minimal added sugars, fruits, whole grains, and dairy products.",
             "foods_avoid": ["sugar"]
         }}</sample_output>
@@ -97,7 +104,7 @@ def get_food_recommended(data):
     try:
         nutrients_recommended = data["nutrients_recommended"]
         # for key, value in nutrients_recommended:
-        nutrients_list = [item.lower() for item in nutrients_recommended.keys()]
+        nutrients_list = [item['nutrient'] for item in nutrients_recommended]
         food = get_nutrients_data(nutrients_list)
         return ",".join(food)
     except:
@@ -105,17 +112,19 @@ def get_food_recommended(data):
 
 
 def create_plan_text(resp):
-    # try:
-    print(type(resp), "resp type=============================")
-    data = json.loads(resp)
-    print(data)
-    diet_plan_summary = data["diet_plan_summary"]
-    foods_avoid = get_foods_to_avoid(data)
-    foods = get_food_recommended(data)
-    response = f"{diet_plan_summary}\n\n Foods to include: {foods}\n\n Foods to avoid: {foods_avoid}"
-    return response
-    # except:
-    #     return "We are facing some issues. Please try again after sometime."
+    try:
+        data = json.loads(resp)
+        diet_plan_summary = data["diet_plan_summary"]
+        foods_avoid = get_foods_to_avoid(data)
+        foods = get_food_recommended(data)
+        response = f"{diet_plan_summary}\n\n Foods to include: {foods}\n\n Foods to avoid: {foods_avoid}"
+        return response
+    except:
+        return "We are facing some issues. Please try again after sometime."
+
+
+def get_no_llm_response():
+    return '{"nutrients_recommended": [{"nutrient": "protein", "amount": "10", "unit": "g"}, {"nutrient": "carbohydrate", "amount": "20", "unit": "g"}], "diet_plan_summary": "Reduce carbohydrate intake for individuals with Type 2 Diabetes (T2D) has been shown to improve blood glucose. Emphasize consumption of non-starchy vegetables, minimal added sugars, fruits, whole grains, and dairy products.", "foods_avoid": ["Sugar", "Starchy food"]}'
 
 
 def chatbot_response(user_input, llm, option):
@@ -131,5 +140,6 @@ def chatbot_response(user_input, llm, option):
         query = "The user has a {user_input} disease. Can you suggest some diet plans for this disease?".format(user_input=user_input)
         prompt = get_diet_plan_prompt()
         llm_response = get_llm_response(raw_prompt=prompt, query=query, retriever=retriever, llm=llm)
+        # llm_response = get_no_llm_response()
         resp = create_plan_text(llm_response) 
     return resp
