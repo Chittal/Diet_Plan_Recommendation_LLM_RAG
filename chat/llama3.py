@@ -1,5 +1,5 @@
 import json
-from flask import session
+from flask import session, g
 
 from langchain_community.llms import Ollama
 
@@ -8,6 +8,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 
 
 def initialize_llm():
@@ -15,6 +16,7 @@ def initialize_llm():
     return llm
 
 def get_llm_response_history_aware(raw_prompt, query, retriever, llm):
+    chat_history = session["chat_history"]
     retriever_prompt = ChatPromptTemplate.from_messages(
         [
             MessagesPlaceholder(variable_name="chat_history"),
@@ -25,6 +27,9 @@ def get_llm_response_history_aware(raw_prompt, query, retriever, llm):
             ),
         ]
     )
+    print("====================")
+    print(retriever_prompt.format_messages(chat_history=chat_history, input=query))
+    print("====================")
     history_aware_retriever = create_history_aware_retriever(
         llm=llm, retriever=retriever, prompt=retriever_prompt
     )
@@ -37,16 +42,23 @@ def get_llm_response_history_aware(raw_prompt, query, retriever, llm):
         history_aware_retriever,
         document_chain,
     )
+    # print(history_aware_retriever)
+    # print("retriever prompt", retriever_prompt)
     # print(query, "query")
     # print(retrieval_chain, "retrieval chain")
 
     # result = chain.invoke({"input": query})
-    result = retrieval_chain.invoke({"input": query})
+    result = retrieval_chain.invoke({"input": query, "chat_history": chat_history})
+    # print(result)
     # print("=============================================")
     # print(result["answer"])
     # print(result["context"])
     session['chat_history'].append({"role": "human", "content": query})
     session['chat_history'].append({"role": "ai", "content": result["answer"]})
+    # g.chat_history.append(HumanMessage(content=query))
+    # g.chat_history.append(AIMessage(content=result["answer"]))
+    print(session["chat_history"], "updated")
+    session.modified = True
 
     sources = []
     # for doc in result["context"]:
@@ -77,6 +89,10 @@ def get_llm_response(raw_prompt, query, retriever, llm):
     # print(result["context"])
     session['chat_history'].append({"role": "human", "content": query})
     session['chat_history'].append({"role": "ai", "content": result["answer"]})
+    # g.chat_history.append(HumanMessage(content=query))
+    # g.chat_history.append(AIMessage(content=result["answer"]))
+    print(session["chat_history"], "updated")
+    session.modified = True
 
     sources = []
     # for doc in result["context"]:

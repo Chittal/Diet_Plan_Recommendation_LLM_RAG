@@ -16,6 +16,7 @@ import chromadb
 load_dotenv()
 
 app = Flask(__name__)
+# chat_history = []
 app.secret_key = os.getenv('SECRET_KEY')
 llm = Ollama(model="llama3.1:8b")
 
@@ -25,18 +26,26 @@ llm = Ollama(model="llama3.1:8b")
 
 @app.before_request
 def before_request():
+    print(session, "session============")
     if 'chat_history' not in session:
+        print("here")
         session['chat_history'] = []
-    if 'current_state' not in session:
-        session['current_state'] = 'start'  # Initial state
+        session.modified = True
+    # if 'current_state' not in session:
+    #     session['current_state'] = 'start'  # Initial state
+    # g.chat_history = chat_history
 
 
 @app.route('/')
 def home():
+    chat_history = []
+    session["chat_history"] = chat_history
+    print("g updated", session["chat_history"])
     return render_template('index.html')
 
 @app.route('/get_response', methods=['POST'])
 def get_response():
+    print("Chat history=====>", session["chat_history"])
     option = request.form.get('option')
     if option == 'plan_query':
         user_input = request.form['message']

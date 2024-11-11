@@ -183,11 +183,12 @@
         $(document).on('click', '.another-plan-response-btn-yes', function() {
             selectedOption = $(this).data('value');
             $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
-            selectedOption = "another_plan"
-            $('#chatbox').append('<div class="message bot">How do you want diet plans? (Choose Disease or Symptoms)</div>');
-            $('.another-plan-button-container').hide(); // Hide buttons after selection
-            $('.button-container').show(); // Show initial options again for new plan
-            scrollToBottom();
+            window.location.href = '/'; 
+            // selectedOption = "another_plan"
+            // $('#chatbox').append('<div class="message bot">How do you want diet plans? (Choose Disease or Symptoms)</div>');
+            // $('.another-plan-button-container').hide(); // Hide buttons after selection
+            // $('.button-container').show(); // Show initial options again for new plan
+            // scrollToBottom();
         });
 
         // Handle "No" response for another diet plan

@@ -6,6 +6,7 @@ from langchain.prompts import PromptTemplate
 
 from chat.llama3 import get_llm_response, get_llm_response_history_aware
 from vectordb_code.vectorstore import retrieve_index
+from postgres.views import get_nutrients_data
 
 
 def get_diet_plan_prompt():
@@ -35,6 +36,7 @@ def get_diet_plan_prompt():
     #         Answer:
     #     [/INST]
     # Your output should be professional summary for the patient in JSON format. 
+    #  along with recommended foods, foods to avoid, and specific nutrient levels
     # """
     # )
     raw_prompt = PromptTemplate.from_template(
@@ -43,11 +45,23 @@ def get_diet_plan_prompt():
         Use context only to generate your answer from. The context is enclosed in <context>{context}</context>
         - Respond directly with the JSON output, without any additional text or introductions.
         - Format the output as specified, including "nutrients_recommended", "diet_plan_summary", and "foods_avoid".
+
         Output: 
         Your output should be in JSON format containg following elements with specified key.
-        1. rutrients_recommended - Recommend nutrients for the patient. Example - Protein - 20g, carbohydrate - 10g etc. 
-        2. diet_plan_summary - Create a detailed professional summary for diet plan of the patient. 
-        3. foods_avoid - Include foods to avoid if any.
+        1. nutrients_recommended - Recommend nutrients for the patient. Example - Protein - 20g, carbohydrate - 10g etc. 
+        2. diet_plan_summary - Provide a very detailed explanation of diet plan for user in a paragraph. Also, include recommended foods, foods to avoid, and specific nutrient levels.
+        3. foods_avoid - List with foods to avoid if any.
+
+        Strictly follow the below sample output format enclosed in <sample_output>
+        Sample output:
+        {{
+            "nutrients_recommended": {{
+                "protein": "10g",
+                "carbohydrate": 20g
+            }},
+            "diet_plan_summary": "Reduce carbohydrate intake for individuals with Type 2 Diabetes (T2D) has been shown to improve blood glucose. Emphasize consumption of non-starchy vegetables, minimal added sugars, fruits, whole grains, and dairy products.",
+            "foods_avoid": ["sugar"]
+        }}</sample_output>
         
         """
     )
@@ -59,14 +73,49 @@ def plan_query_prompt():
     raw_prompt = PromptTemplate.from_template(
         """ 
         You are a nutrition AI assistant and your task is to answer followup questions on diet plan which you provided already. Below are the rules you need to follow:
-            - The input query will contain user query regarding the diet plan provided by you.
-            - You need to answer the query based on context provided and diet plan provided by you already.
+            - The input query will contain user query regarding the diet plan provided by you in the conversation.
+            - You need to answer the query based on context provided and diet plan provided by you already. If cannot find in context, answer professionally on your own. Keep in mind about user health condition.
          Question is enclosed in <input>{input}</input>
          The context is enclosed in <context>{context}</context>
-        NO PREAMBLE
+         Respond directly with output.
     """
     )
     return raw_prompt
+
+
+def get_foods_to_avoid(data):
+    try:
+        foods_avoid = data["foods_avoid"]
+        is_list = isinstance(foods_avoid, list) and all(isinstance(item, str) for item in foods_avoid)
+        if not is_list:
+            raise TypeError
+    except:
+        return []
+    
+
+def get_food_recommended(data):
+    try:
+        nutrients_recommended = data["nutrients_recommended"]
+        # for key, value in nutrients_recommended:
+        nutrients_list = [item.lower() for item in nutrients_recommended.keys()]
+        food = get_nutrients_data(nutrients_list)
+        return ",".join(food)
+    except:
+        return None
+
+
+def create_plan_text(resp):
+    # try:
+    print(type(resp), "resp type=============================")
+    data = json.loads(resp)
+    print(data)
+    diet_plan_summary = data["diet_plan_summary"]
+    foods_avoid = get_foods_to_avoid(data)
+    foods = get_food_recommended(data)
+    response = f"{diet_plan_summary}\n\n Foods to include: {foods}\n\n Foods to avoid: {foods_avoid}"
+    return response
+    # except:
+    #     return "We are facing some issues. Please try again after sometime."
 
 
 def chatbot_response(user_input, llm, option):
@@ -81,11 +130,6 @@ def chatbot_response(user_input, llm, option):
         # query = disease_description[user_input.lower()]
         query = "The user has a {user_input} disease. Can you suggest some diet plans for this disease?".format(user_input=user_input)
         prompt = get_diet_plan_prompt()
-        resp = get_llm_response(raw_prompt=prompt, query=query, retriever=retriever, llm=llm)
-        # get nutrient from resp, diet from resp, foods to avoid from resp
-        diet = resp
-        food_nutrients = ['Apple', 'Orange', 'Banana']
-        avoid = ['Sugar']
-        # foods = collect_food(nutrient)
-        resp = "{diet}\nFoods to include: {foods}\nFoods to avoid: {avoid}".format(diet=diet, foods=','.join(food_nutrients), avoid=','.join(avoid))
+        llm_response = get_llm_response(raw_prompt=prompt, query=query, retriever=retriever, llm=llm)
+        resp = create_plan_text(llm_response) 
     return resp
