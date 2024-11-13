@@ -22,14 +22,13 @@ def get_llm_response_history_aware(raw_prompt, query, retriever, llm):
             MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{input}"),
             (
-                "human",
-                "Given the above conversation, generation a search query to lookup in order to get information relevant to the conversation",
+                "human", "Given the above conversation, generate a search query to lookup in order to get information relevant to the conversation",
             ),
         ]
     )
-    print("====================")
-    print(retriever_prompt.format_messages(chat_history=chat_history, input=query))
-    print("====================")
+    # print("====================")
+    # print(retriever_prompt.format_messages(chat_history=chat_history, input=query))
+    # print("====================")
     history_aware_retriever = create_history_aware_retriever(
         llm=llm, retriever=retriever, prompt=retriever_prompt
     )
@@ -57,7 +56,7 @@ def get_llm_response_history_aware(raw_prompt, query, retriever, llm):
     session['chat_history'].append({"role": "ai", "content": result["answer"]})
     # g.chat_history.append(HumanMessage(content=query))
     # g.chat_history.append(AIMessage(content=result["answer"]))
-    print(session["chat_history"], "updated")
+    # print(session["chat_history"], "updated")
     session.modified = True
 
     sources = []
@@ -83,22 +82,25 @@ def get_llm_response(raw_prompt, query, retriever, llm):
     # result = chain.invoke({"input": query})
     result = chain.invoke({"input": query})
     print("=============================================")
-    # print(result)
-    print("=============================================")
     print('ANSWER: ',result["answer"])
     # print(result["context"])
     session['chat_history'].append({"role": "human", "content": query})
     session['chat_history'].append({"role": "ai", "content": result["answer"]})
     # g.chat_history.append(HumanMessage(content=query))
     # g.chat_history.append(AIMessage(content=result["answer"]))
-    print(session["chat_history"], "updated")
+    # print(session["chat_history"], "updated")
+    # print("meta data", result)
     session.modified = True
 
     sources = []
-    # for doc in result["context"]:
-    #     sources.append(
-    #         {"source": doc.metadata["source"], "page_content": doc.page_content}
-    #     )
+    for doc in result["context"]:
+        sources.append(
+            {"source": doc.metadata["file_name"], "page_content": doc.page_content}
+        )
 
     response_answer = {"answer": result["answer"], "sources": sources}
+    # print("================================================")
+    # print(response_answer)
+    # with open('response.json', 'w') as file:
+    #     json.dump(response_answer, file, indent=4)
     return response_answer["answer"]
