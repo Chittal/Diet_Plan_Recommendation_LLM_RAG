@@ -1,0 +1,45 @@
+1. First prompt
+Bot: Hello! I'm here to help you create a diet plan tailored to your needs. How do you want diet plans?
+Button: Disease, Symptoms
+2. Symptoms
+Bot: Got it! Could you share more details? Specifically, your age, height, weight and symptoms.
+Form like: age, weight, height, symptoms
+3. Provide diet plans based on symptoms
+Bot: XXX diet plans. Do you have any questions on this diet plan?
+Button: Yes, No
+4. Any question - Yes
+Bot: Please enter your query.
+5. Any question - No
+Bot: Do you want to create another diet plan?
+Button: Yes, No
+6. Another diet plan - Yes
+Then loop to 1
+7. Another diet plan - No
+Thank you!
+8. Symptoms
+Bot: Got it! Could you share your age, height, weight and disease?
+Form like: age, weight, height, disease
+9. Provide diet plans based on symptoms
+Bot: XXX diet plans. Do you have any questions on this diet plan?
+Button: Yes, No
+10. Any question - Yes
+Bot: Please enter your query.
+11. Any question - No
+Bot: Do you want to create another diet plan?
+Button: Yes, No
+12. Another diet plan - Yes
+Then loop to 1
+13. Another diet plan - No
+Thank you!
+
+
+
+======================================
+Tasks
+-------------------------------------
+1. convert nutrients to dict amount and unit then fetch from postgres
+2. Loading symbol --- DONE
+3. Try to ask prompt to combine documents (Bring same result for same query)
+4. Find symptom based retriever for each disease
+5. Beautify plan response -- DONE
+6. Fix prompt to think on own for followup questions
