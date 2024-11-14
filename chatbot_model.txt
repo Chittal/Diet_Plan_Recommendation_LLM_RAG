@@ -37,9 +37,17 @@ Thank you!
 ======================================
 Tasks
 -------------------------------------
-1. convert nutrients to dict amount and unit then fetch from postgres
+1. convert nutrients to dict amount and unit then fetch from postgres -- DONE
 2. Loading symbol --- DONE
 3. Try to ask prompt to combine documents (Bring same result for same query)
 4. Find symptom based retriever for each disease
 5. Beautify plan response -- DONE
-6. Fix prompt to think on own for followup questions
+6. Fix prompt to think on own for followup questions -- DONE
+
+7. Fix prompt to say nutrients in singular and say only nutrients (not food)
+8. Find list of symptoms for diabetes and heart disease.
+9. Create consistent response
+10. Answer only followup questions related to diet plan
+
+
+11. Update text, button and chatbot tilte in app - UI

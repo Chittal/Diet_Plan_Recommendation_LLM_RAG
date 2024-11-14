@@ -6,7 +6,7 @@ password = os.getenv('POSTGRES_PASSWORD')
 host = os.getenv('POSTGRES_HOST')
 port = int(os.getenv('POSTGRES_PORT'))
 database = os.getenv('POSTGRES_DATABASE')
-tablename = 'food_nutrient'
+tablename = 'foundation_food_nutrient'
 
 def get_nutrients_data(nutrient_list):
     # Establishing the connection to the PostgreSQL database
@@ -24,7 +24,7 @@ def get_nutrients_data(nutrient_list):
     
     # Query to get items with specified nutrients
     query = f"""
-        SELECT INITCAP(food_name)
+        SELECT DISTINCT(INITCAP(food_name))
         FROM {tablename}
         WHERE LOWER(nutrient) IN %s LIMIT 10;
     """
