@@ -102,58 +102,6 @@ def query_sentence_transormer_collection(name, query_text, n_results=5):
     return results['metadatas']
 
 
-def create_collection_fast_embedding(name):
-    embeddings = get_embedding()
-    base_dir = 'data/' + name
-    collection = Chroma(persist_directory='./storage/chroma', embedding_function=embeddings, collection_name=name)
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1024, chunk_overlap=80, length_function=len, is_separator_regex=False
-    )
-    for root, dirs, files in os.walk(base_dir):
-        for file in files:
-            if file.endswith(".pdf"):
-                file_name = os.path.join(root, file)
-                loader = PDFPlumberLoader(file_name)
-                docs = loader.load_and_split()
-                print(f"docs len={len(docs)}")
-
-                chunks = text_splitter.split_documents(docs)
-                print(f"chunks len={len(chunks)}")
-                # ids = []
-                # embedding = []
-                # for chunk_index, chunk in enumerate(chunks):
-                #     text_content = chunk.page_content
-                #     embed_chunk = embeddings(text_content)  # Ensure this calls the embedding function correctly
-                #     embedding.append(embed_chunk)
-                #     ids.append(f"{file_name}_{chunk_index}")
-
-                collection.add_documents(documents=chunks) # , embeddings=embedding, ids=ids
-    # db.persist()
-
-
-def get_vector_store_retriever(name):
-    embeddings = get_embedding()
-    # chroma_collection = db.get_or_create_collection(
-    #     name=name,
-    #     embedding_function=embeddings
-    # )
-    # vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
-    vector_store = Chroma(persist_directory='./storage/chroma', embedding_function=embeddings, collection_name=name)
-
-    print("Creating chain with collection")
-
-    # Set up retriever with the Chroma collection
-    retriever = vector_store.as_retriever(
-        search_type="similarity_score_threshold",
-        search_kwargs={
-            "k": 20,
-            "score_threshold": 0.1,
-        },
-    )
-
-    return retriever
-
-
 def list_all_collections():
     db = get_db()
     print(f"Available collections: {db.list_collections()}")
@@ -166,8 +114,6 @@ def delete_collection(collection_name):
         print(f"Collection '{collection_name}' has been deleted successfully.")
     except Exception as e:
         print(f"An error occurred while deleting the collection: {e}")
-
-# delete_collection("diet_plan")
 
 
 def create_index(name):
@@ -183,23 +129,8 @@ def create_index(name):
 
 
 def retrieve_index(name):
-    # fetch documents and index from storage
-    # db = get_db()
-    # chroma_collection = db.get_collection(name=name)
-    # chroma_vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
-    # Settings.embed_model = get_embedding()
-    # index = VectorStoreIndex.from_vector_store(vector_store=chroma_vector_store)
-    # retriever = index.as_retriever(search_type="similarity_score_threshold",
-    #     search_kwargs={
-    #         "k": 20,
-    #         "score_threshold": 0.1,
-    #     },)
-    # return retriever
     vector_store = Chroma(persist_directory='storage/chroma', embedding_function=get_embedding(), collection_name=name)
-
     print("Creating chain with collection")
-
-    # Set up retriever with the Chroma collection
     retriever = vector_store.as_retriever(
         search_type="similarity_score_threshold",
         search_kwargs={
