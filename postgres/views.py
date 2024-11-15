@@ -19,23 +19,36 @@ def get_nutrients_data(nutrient_list):
     cursor = conn.cursor()
 
     # Convert nutrient_list to a SQL-friendly string (assuming they are column names or keywords)
-    nutrients_tuple = tuple(nutrient_list)
-    print(nutrients_tuple)
+    nutrient_list = [item + '%' for item in nutrient_list]
+    limit = len(nutrient_list) * 3
     
-    # Query to get items with specified nutrients
-    query = f"""
-        SELECT DISTINCT(INITCAP(food_name))
-        FROM {tablename}
-        WHERE LOWER(nutrient) IN %s LIMIT 10;
+    nutrient_tuple = ', '.join(f"'{nutrient}'" for nutrient in nutrient_list)
+    # nutrients_tuple = tuple(nutrient_list)
+    # print(nutrient_tuple)
+    
+    query = f""" 
+        WITH ranked_foods AS (
+            SELECT 
+                DISTINCT INITCAP(food_name) AS food_name,
+                nutrient,
+                ROW_NUMBER() OVER (PARTITION BY nutrient ORDER BY food_name) AS rn
+            FROM public.foundation_food_nutrient
+            WHERE LOWER(nutrient) ILIKE ANY (ARRAY[{nutrient_tuple}])
+        )
+        SELECT food_name, nutrient
+        FROM ranked_foods
+        WHERE rn <= 3
+        ORDER BY nutrient, rn
+        LIMIT {str(limit)};
     """
-    print(query)
+    # print(query)
     
-    cursor.execute(query, (nutrients_tuple,))
+    cursor.execute(query)
     result = cursor.fetchall()
     
     cursor.close()
     conn.close()
-    print(result)
+    # print(result)
     
     food_names = [food[0] for food in result]
     return food_names

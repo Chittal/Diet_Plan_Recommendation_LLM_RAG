@@ -48,9 +48,8 @@ def get_llm_response_history_aware(raw_prompt, query, retriever, llm):
 
     # result = chain.invoke({"input": query})
     result = retrieval_chain.invoke({"input": query, "chat_history": chat_history})
-    # print(result)
-    # print("=============================================")
-    # print(result["answer"])
+    print("=============================================")
+    print('ANSWER: ',result["answer"])
     # print(result["context"])
     session['chat_history'].append({"role": "human", "content": query})
     session['chat_history'].append({"role": "ai", "content": result["answer"]})
@@ -104,3 +103,15 @@ def get_llm_response(raw_prompt, query, retriever, llm):
     # with open('response.json', 'w') as file:
     #     json.dump(response_answer, file, indent=4)
     return response_answer["answer"]
+
+
+def get_llm_response_no_context(query, llm):
+    print("INPUT QUERY TO BEAUTIFY")
+    print(query)
+
+    result = llm.invoke(query)
+
+    print("=============================================")
+    print('ANSWER: ',result)
+
+    return result

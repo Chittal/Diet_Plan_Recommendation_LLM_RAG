@@ -44,10 +44,14 @@ Tasks
 5. Beautify plan response -- DONE
 6. Fix prompt to think on own for followup questions -- DONE
 
-7. Fix prompt to say nutrients in singular and say only nutrients (not food)
+7. Fix prompt to say nutrients in singular and say only nutrients (not food) -- DONE
 8. Find list of symptoms for diabetes and heart disease.
 9. Create consistent response
-10. Answer only followup questions related to diet plan
+10. Answer only followup questions related to diet plan -- DONE
+11. If error in validation, handle in app flow (frontend)
+12. Format response beautifully using LLM -- DONE
+13. Say to user "You have possibility of ____ disease consult with doctor. Follow these diet plans to stay healthy" in symptoms flow.
+14. give unique recommended food, Beautify text output with bulletins and title in bold.
 
 
 11. Update text, button and chatbot tilte in app - UI

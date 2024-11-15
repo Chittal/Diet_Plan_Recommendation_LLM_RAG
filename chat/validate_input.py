@@ -2,7 +2,8 @@ import re
 
 def validate_symptoms(input):
     parts = input.split(",")
-    if all(part.isalpha() for part in parts):
+    pattern = r'^[a-zA-Z\s-]+$'
+    if all(re.match(pattern, part) for part in parts):
         return 200, input
     else:
         return 400, "Please provide valid symptoms."
