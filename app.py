@@ -35,17 +35,29 @@ def before_request():
         print("here")
         session['chat_history'] = []
         session.modified = True
-    # if 'current_state' not in session:
-    #     session['current_state'] = 'start'  # Initial state
-    # g.chat_history = chat_history
 
 
 @app.route('/')
 def home():
     chat_history = []
     session["chat_history"] = chat_history
+    return render_template('home.html')
+
+
+@app.route('/chatbot')
+def chatbot():
+    chat_history = []
+    session["chat_history"] = chat_history
     # print("g updated", session["chat_history"])
-    return render_template('index.html')
+    return render_template('chatbot.html')
+
+
+@app.route('/aboutus')
+def aboutus():
+    chat_history = []
+    session["chat_history"] = chat_history
+    return render_template('aboutus.html')
+
 
 @app.route('/get_response', methods=['POST'])
 def get_response():

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collapsible Navigation Panel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+        }
+
+        .sidebar {
+            /* width: 250px; */
+            width: 60px;
+            height: 100vh;
+            background-color: rgb(189, 185, 185);
+            color: #333;
+            overflow: hidden;
+            position: fixed;
+            transition: width 0.3s;
+        }
+
+        /* .sidebar.collapsed {
+            width: 60px;
+        } */
+
+        .toggle-btn {
+            background-color: rgb(189, 185, 185);
+            color: #333;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .nav-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-items li {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .nav-items li:hover {
+            background-color: #e9ecef;
+        }
+
+        .nav-items .icon {
+            margin-right: 10px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .nav-items .nav-text {
+            flex: 1;
+            white-space: nowrap;
+        }
+        /* .sidebar.collapsed */
+        .nav-text {
+            display: none;
+        }
+
+        .content {
+            flex: 1;
+            /* margin-left: 250px; To make space for the sidebar */
+            margin-left: 60px;
+            padding: 20px;
+            overflow-y: auto;
+            /* height: 100vh; Allow scrolling in the content */
+            background-color: #f8f9fa;
+            transition: margin-left 0.3s ease;
+        }
+        /* .content.collapsed {
+            margin-left: 60px;
+        } */
+
+        /* Home Page Styles */
+        .welcome-banner {
+            text-align: center;
+            background-image: url('static/image/diet_bcgd.jpg'); /* Replace with your image URL */
+            background-size: cover; /* Cover the whole section */
+            background-position: center; /* Center the image */
+            color: white;
+            padding: 60px 20px;
+            height: 200px;
+            /* border-radius: 10px;
+            margin: 20px 0; */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .welcome-banner h1 {
+            /* z-index: 2; */
+            /* display: inline-block; */
+            /* background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)); */
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: black;
+        }
+
+        .welcome-banner p {
+            z-index: 2;
+            background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .diet-plan-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;  /* Adjusts the space above the button */
+        }
+
+        .diet-plan-button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .diet-plan-button:hover {
+            background-color: #555;
+        }
+
+        .intro-paragraph {
+            z-index: 2;
+            /* background-color: white; */
+            color: #333;
+            font-size: 1.3rem;
+            padding: 20px;
+            margin-bottom: 20px;
+            margin-top: 50px;
+            border-radius: 10px;
+            /* max-width: 80%; */
+            margin: 0 auto;
+        }
+
+        .key-features {
+            padding: 20px;
+        }
+
+        .key-features h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .features-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+        }
+
+        .feature-item {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            flex: 1 1 calc(30% - 20px);
+            max-width: calc(30% - 20px);
+            text-align: center;
+        }
+
+        .feature-item h3 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #444;
+        }
+
+        .how-it-works {
+            padding: 40px 0;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .how-it-works h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .step-item {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-item h3 {
+            font-size: 1.2rem;
+            color: #444;
+        }
+
+        .get-started {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .get-started h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .get-started p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .get-started button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .get-started button:hover {
+            background-color: #555;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <!-- <button class="toggle-btn" onclick="toggleSidebar()">☰</button> -->
+        <ul class="nav-items">
+            <li>
+                <a href="/">
+                <i class="fas fa-home icon"></i>
+                <span class="nav-text">Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="/chatbot">
+                <i class="fas fa-robot icon"></i>
+                <span class="nav-text">Chatbot</span>
+                </a> 
+            </li>
+            <li>
+                <a href="/aboutus">
+                <i class="fas fa-info-circle icon"></i>
+                <span class="nav-text">About Us</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="content" id="content">
+        <div id="homePageContent">
+            <!-- Welcome Banner -->
+            <div class="welcome-banner">
+                <h1>NutriBuddy</h1>
+                <!-- <p>Your AI-powered companion for personalized diet plans tailored to detect and manage chronic health conditions mainly focusing on thyroid, heart disease, and diabetes.</p> -->
+                <!-- <button>Get Diet-plan</button> -->
+            </div>
+            <p class="intro-paragraph">NutriBuddy is your AI-powered companion for personalized diet plans tailored to detect and manage chronic health conditions, primarily focusing on thyroid, heart disease, and diabetes.</p>
+            <div class="diet-plan-container">
+                <button class="diet-plan-button" onclick="window.location.href='/chatbot'">Get Diet-plan</button>
+            </div>
+            <!-- Key Features -->
+            <div class="key-features">
+                <h2>Key Features</h2>
+                <div class="features-list">
+                    <div class="feature-item">
+                        <h3>Personalized Diet Plans</h3>
+                        <p>Get customized plans tailored to your health needs.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>AI-Driven Insights</h3>
+                        <p>Leverage cutting-edge AI for smarter decisions.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h3>Disease Identification</h3>
+                        <p>Provide symptoms to identify possible disease.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How It Works -->
+            <div class="how-it-works">
+                <h2>How It Works</h2>
+                <div class="steps">
+                    <div class="step-item">
+                        <h3>Step 1: Input Your Details</h3>
+                        <p>Provide your symptoms or disease to get started.</p>
+                    </div>
+                    <div class="step-item">
+                        <h3>Step 2: Get Tailored Diet Plans</h3>
+                        <p>Receive personalized diet recommendations instantly.</p>
+                    </div>
+                    <div class="step-item">
+                        <h3>Step 3: Achieve Your Goals</h3>
+                        <p>Follow actionable insights to improve your health.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Get Started -->
+            <div class="get-started">
+                <h2>Ready to Transform Your Health?</h2>
+                <p>Join thousands of users taking control of their well-being with NutriBuddy.</p>
+                <button onclick="window.location.href='/chatbot'">Get Started!</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // function toggleSidebar() {
+        //     const sidebar = document.getElementById('sidebar');
+        //     sidebar.classList.toggle('collapsed');
+        //     const contentBody = document.getElementById('content');
+        //     contentBody.classList.toggle('collapsed');
+        // }
+
+    </script>
+</body>
+</html>

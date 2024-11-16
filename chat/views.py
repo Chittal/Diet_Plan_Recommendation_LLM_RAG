@@ -97,7 +97,7 @@ def create_plan_text(disease, resp, llm):
     foods_avoid = get_foods_to_avoid(data)
     foods = get_food_recommended(data)
     dis_line = f"You have possibility of {disease} disease consult with doctor. Follow these diet plans to stay healthy"
-    inp = f"{dis_line}\n{diet_plan_summary}\n\n Foods to include: {foods}\n\n Foods to avoid: {foods_avoid}"
+    inp = f"**{disease} Diet plan Recommendation**\n{dis_line}\n{diet_plan_summary}\n\n Foods to include: {foods}\n\n Foods to avoid: {foods_avoid}"
     txt = get_llm_response_no_context(query=beautify_text_prompt(inp), llm=llm)
     return txt
 

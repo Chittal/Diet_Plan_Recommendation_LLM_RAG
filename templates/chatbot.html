@@ -4,23 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot Interface</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        * {
+        body {
             margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            display: flex;
         }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
+        .sidebar {
+            /* width: 250px; */
+            width: 60px;
             height: 100vh;
+            background-color: rgb(189, 185, 185);
+            color: #333;
+            overflow: hidden;
+            position: fixed;
+            transition: width 0.3s;
+        }
+
+        /* .sidebar.collapsed {
+            width: 60px;
+        } */
+
+        .toggle-btn {
+            background-color: rgb(189, 185, 185);
+            color: #333;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .nav-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-items li {
             display: flex;
-            justify-content: center;
             align-items: center;
+            padding: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .nav-items li:hover {
+            background-color: #e9ecef;
+        }
+
+        .nav-items .icon {
+            margin-right: 10px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .nav-items .nav-text {
+            flex: 1;
+            white-space: nowrap;
+        }
+        /* .sidebar.collapsed */
+        .nav-text {
+            display: none;
+        }
+
+        .content {
+            flex: 1;
+            /* margin-left: 250px; To make space for the sidebar */
+            margin-left: 60px;
+            padding: 20px;
+            overflow-y: auto;
+            /* height: 100vh; Allow scrolling in the content */
+            background-color: #f8f9fa;
+            transition: margin-left 0.3s ease;
         }
 
         .chat-container {
@@ -28,12 +88,12 @@
             flex-direction: column;
             justify-content: space-between;
             width: 100%;
-            max-width: 1000px; /* Maximum width to limit the size on larger screens */
-            height: 100vh;
+            /* max-width: 1000px; Maximum width to limit the size on larger screens */
+            height: 590px;
             border-radius: 0;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             background-color: white;
-            overflow: hidden;
+            /* overflow: hidden; */
         }
 
         .chat-header {
@@ -72,7 +132,7 @@
 
         .message.user {
             align-self: flex-end;
-            background-color: #3c82f6;
+            background-color: #333;
             color: white;
         }
 
@@ -99,7 +159,7 @@
 
         .chat-input button {
             padding: 15px 30px;
-            background-color: #3c82f6;
+            background-color: #333;
             color: white;
             border: none;
             border-radius: 5px;
@@ -108,7 +168,7 @@
         }
 
         .chat-input button:hover {
-            background-color: #2f6de5;
+            background-color: #555;
         }
 
         .chatbox::-webkit-scrollbar {
@@ -136,7 +196,7 @@
         .button-container, .another-plan-button-container, .question-button-container {
             display: flex;
             gap: 15px;
-            justify-content: center;
+            /* justify-content: center; */
             margin-top: 20px;
         }
 
@@ -145,7 +205,7 @@
             font-size: 16px;
             font-weight: bold;
             color: white;
-            background-color: #3c82f6;
+            background-color: #333;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -154,7 +214,7 @@
         }
 
         .response-btn:hover, .another-plan-response-btn-yes:hover, .another-plan-response-btn-no:hover, .question-response-btn-yes:hover, .question-response-btn-no:hover {
-            background-color: #2f6de5;
+            background-color: #555;
             transform: translateY(-3px);
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
         }
@@ -162,10 +222,34 @@
     </style>
 </head>
 <body>
+    <div class="sidebar" id="sidebar">
+        <!-- <button class="toggle-btn" onclick="toggleSidebar()">☰</button> -->
+        <ul class="nav-items">
+            <li>
+                <a href="/">
+                <i class="fas fa-home icon"></i>
+                <span class="nav-text">Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="/chatbot">
+                <i class="fas fa-robot icon"></i>
+                <span class="nav-text">Chatbot</span>
+                </a> 
+            </li>
+            <li>
+                <a href="/aboutus">
+                <i class="fas fa-info-circle icon"></i>
+                <span class="nav-text">About Us</span>
+            </a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="content" id="content">
     <div class="chat-container">
         <div class="chat-header">
             <h1>NutriBuddy - Diet Plan Recommendation Chatbot</h1>
-            <p>Your AI-powered companion for personalized diet plans tailored to detect and manage chronic health conditions mainly focusing on thyroid, heart disease, and diabetes.</p>
         </div>
     
         <div id="chatbox" class="chatbox">
@@ -180,16 +264,13 @@
                 <br>
             </div>
             <div class="button-container">
-                <button class="response-btn" data-value="disease">Disease</button>
-                <button class="response-btn" data-value="symptoms">Symptoms</button>
+                <button class="response-btn" data-value="Disease">Disease</button>
+                <button class="response-btn" data-value="Symptoms">Symptoms</button>
             </div>
         </div>
     
         <form id="infoForm" class="chat-input" style="display:none;">
             <input type="text" id="condition" placeholder="Enter Disease or Symptoms" required>
-            <!-- <input type="number" id="age" placeholder="Age" required>
-            <input type="number" id="weight" placeholder="Weight (kg)" required>
-            <input type="number" id="height" placeholder="Height (cm)" required> -->
             <button type="submit">Submit</button>
         </form>
     
@@ -197,6 +278,7 @@
             <input type="text" id="userMessage" placeholder="Type your message..." autocomplete="off" required>
             <button type="submit">Send</button>
         </form>
+    </div>
     </div>
     
     <script>
@@ -265,7 +347,7 @@
         $(document).on('click', '.another-plan-response-btn-yes', function() {
             selectedOption = $(this).data('value');
             $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
-            window.location.href = '/';
+            window.location.href = '/chatbot';
         });
 
         // Handle "No" response for another diet plan
