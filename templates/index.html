@@ -41,8 +41,17 @@
             color: white;
             padding: 20px;
             text-align: center;
+        }
+
+        .chat-header h1 {
             font-size: 24px;
+            margin-bottom: 5px;
             font-weight: bold;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            margin: 0;
         }
 
         .chatbox {
@@ -124,20 +133,52 @@
             60% { content: '...'; }
             80%, 100% { content: ''; }
         }
-        /*#age, #weight, #height {
-            width: 50px;
-        }*/
+        .button-container, .another-plan-button-container, .question-button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .response-btn, .another-plan-response-btn-yes, .another-plan-response-btn-no, .question-response-btn-yes, .question-response-btn-no {
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #3c82f6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .response-btn:hover, .another-plan-response-btn-yes:hover, .another-plan-response-btn-no:hover, .question-response-btn-yes:hover, .question-response-btn-no:hover {
+            background-color: #2f6de5;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
         
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            Chatbot
+            <h1>NutriBuddy - Diet Plan Recommendation Chatbot</h1>
+            <p>Your AI-powered companion for personalized diet plans tailored to detect and manage chronic health conditions mainly focusing on thyroid, heart disease, and diabetes.</p>
         </div>
     
         <div id="chatbox" class="chatbox">
-            <div class="message bot">Hello! I'm here to help you create a diet plan tailored to your needs. How do you want to create diet plans?</div>
+            <div class="message bot">
+                Hello! I'm here to help you create a diet plan tailored to your needs. 
+                <br>
+                Please choose an option:
+                <br>
+                -If you know the disease, select <strong>Disease</strong>.
+                <br>
+                -If you're unsure and can describe your symptoms, select <strong>Symptoms</strong>.
+                <br>
+            </div>
             <div class="button-container">
                 <button class="response-btn" data-value="disease">Disease</button>
                 <button class="response-btn" data-value="symptoms">Symptoms</button>
@@ -160,6 +201,10 @@
     
     <script>
         let selectedOption = "";
+        const contentDiv = document.getElementById('chatbox');
+
+        // Replace text surrounded by ** with <b> tags
+        contentDiv.innerHTML = contentDiv.innerHTML.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
         function showTypingIndicator() {
             // Remove any existing typing indicator
             $('#typing-indicator').remove();
@@ -173,6 +218,24 @@
 
         function hideTypingIndicator() {
             $('#typing-indicator').remove();
+        }
+        function showAnotherPlanButton() {
+            $('#chatbox').append('<div class="message bot">Would you like to generate another diet plan?</div>');
+            $('#chatbox').append(`
+                <div class="another-plan-button-container">
+                    <button class="another-plan-response-btn-yes" data-value="Yes">Yes</button>
+                    <button class="another-plan-response-btn-no" data-value="No">No</button>
+                </div>
+            `);
+        }
+        function anyOtherQuestionButton() {
+            $('#chatbox').append('<div class="message bot"> Do you have any other questions? </div>');
+            $('#chatbox').append(`
+                <div class="question-button-container">
+                    <button class="question-response-btn-yes" data-value="Yes">Yes</button>
+                    <button class="question-response-btn-no" data-value="No">No</button>
+                </div>
+            `);
         }
         $(document).ready(function() {
             function scrollToBottom() {
@@ -193,13 +256,7 @@
         $(document).on('click', '.question-response-btn-no', function() {
             selectedOption = $(this).data('value');
             $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
-            $('#chatbox').append('<div class="message bot">Would you like to generate another diet plan?</div>');
-            $('#chatbox').append(`
-                <div class="another-plan-button-container">
-                    <button class="another-plan-response-btn-yes" data-value="Yes">Yes</button>
-                    <button class="another-plan-response-btn-no" data-value="No">No</button>
-                </div>
-            `);
+            showAnotherPlanButton();
             scrollToBottom();
             $('.question-button-container').hide(); // Hide buttons after selection
         });
@@ -208,12 +265,7 @@
         $(document).on('click', '.another-plan-response-btn-yes', function() {
             selectedOption = $(this).data('value');
             $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
-            window.location.href = '/'; 
-            // selectedOption = "another_plan"
-            // $('#chatbox').append('<div class="message bot">How do you want diet plans? (Choose Disease or Symptoms)</div>');
-            // $('.another-plan-button-container').hide(); // Hide buttons after selection
-            // $('.button-container').show(); // Show initial options again for new plan
-            // scrollToBottom();
+            window.location.href = '/';
         });
 
         // Handle "No" response for another diet plan
@@ -256,27 +308,22 @@
                     data: {
                         option: selectedOption,
                         condition: condition,
-                        // age: age,
-                        // weight: weight,
-                        // height: height
                     },
                     success: function(data) {
                         hideTypingIndicator();
                         var formattedResponse = data.response.replace(/\n/g, '<br>');
-                        formattedResponse = formattedResponse.replace(/Foods to include:/g, '<strong>Foods to include:</strong>').replace(/Foods to avoid:/g, '<strong>Foods to avoid:</strong>');
                         $('#chatbox').append('<div class="message bot">' + formattedResponse + '</div>');
-                        $('#chatbox').append('<div class="message bot"> Do you have any other questions? </div>');
-                        $('#chatbox').append(`
-                            <div class="question-button-container">
-                                <button class="question-response-btn-yes" data-value="Yes">Yes</button>
-                                <button class="question-response-btn-no" data-value="No">No</button>
-                            </div>
-                        `);
+                        if (data.status === 200) {
+                            anyOtherQuestionButton();
+                        } else {
+                            showAnotherPlanButton();
+                        }
                         scrollToBottom();
                     },
                     error: function() {
                         hideTypingIndicator();
                         $('#chatbox').append('<div class="message bot">An error occurred. Please try again.</div>');
+                        showAnotherPlanButton();
                         scrollToBottom();
                     }
                 });
@@ -303,18 +350,17 @@
                     success: function(data) {
                         hideTypingIndicator();
                         $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
-                        $('#chatbox').append('<div class="message bot"> Do you have any other questions? </div>');
-                        $('#chatbox').append(`
-                            <div class="question-button-container">
-                                <button class="question-response-btn-yes" data-value="Yes">Yes</button>
-                                <button class="question-response-btn-no" data-value="No">No</button>
-                            </div>
-                        `);
+                        if (data.status === 200) {
+                            anyOtherQuestionButton();
+                        } else {
+                            showAnotherPlanButton();
+                        }
                         scrollToBottom();
                     },
                     error: function() {
                         hideTypingIndicator();
                         $('#chatbox').append('<div class="message bot">An error occurred. Please try again.</div>');
+                        showAnotherPlanButton();
                         scrollToBottom();
                     }
                 });

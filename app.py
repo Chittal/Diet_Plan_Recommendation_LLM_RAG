@@ -49,38 +49,33 @@ def home():
 
 @app.route('/get_response', methods=['POST'])
 def get_response():
-    # print("Chat history=====>", session["chat_history"])
-    option = request.form.get('option')
-    if option == 'plan_query':
-        user_input = request.form['message']
-        status, user_input = check_questions(user_input)
-        if status == 200:
-            response = chatbot_response(user_input, llm, option)
-        else:
-            response = user_input
-    else:
-        # age = request.form.get('age')
-        # weight = request.form.get('weight')
-        # height = request.form.get('height')
-        
-        condition = request.form.get('condition')
-        if option == 'disease':
-            disease = condition
-            print(disease, "----------------------diseaase")
-            response = chatbot_response(disease, llm, option)
-        else:
-            # disease = find_disease(age, height, weight, condition)
-            status, symptoms_resp = validate_symptoms(condition)
+    try:
+        option = request.form.get('option')
+        if option == 'plan_query':
+            user_input = request.form['message']
+            status, user_input = check_questions(user_input)
             if status == 200:
-                disease = find_disease(symptoms_resp)
-                print(disease, "----------------------diseaase")
+                response = chatbot_response(user_input, llm, option)
+            else:
+                return jsonify({"status": 400, "response": user_input})
+        else:
+            condition = request.form.get('condition')
+            if option == 'disease':
+                disease = condition
+                print("DISEASE:", disease)
                 response = chatbot_response(disease, llm, option)
             else:
-                response = symptoms_resp
-        # print(response)
-    # if session['current_state'] == 'start':
-    # else:
-    return jsonify({'response': response})
+                # disease = find_disease(age, height, weight, condition)
+                status, symptoms_resp = validate_symptoms(condition)
+                if status == 200:
+                    disease = find_disease(symptoms_resp)
+                    print("DISEASE:", disease)
+                    response = chatbot_response(disease, llm, option)
+                else:
+                    return jsonify({"status": 400, "response": symptoms_resp})
+        return jsonify({'status': 200, 'response': response})
+    except:
+        return jsonify({"status": 400, "response": "We are facing some issues. Please try again after sometime."})
 
 if __name__ == '__main__':
     app.run(debug=True)

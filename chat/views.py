@@ -91,17 +91,15 @@ def get_food_recommended(data):
         return None
 
 
-def create_plan_text(resp, llm):
-    # try:
+def create_plan_text(disease, resp, llm):
     data = json.loads(resp)
     diet_plan_summary = data["diet_plan_summary"]
     foods_avoid = get_foods_to_avoid(data)
     foods = get_food_recommended(data)
-    inp = f"{diet_plan_summary}\n\n Foods to include: {foods}\n\n Foods to avoid: {foods_avoid}"
+    dis_line = f"You have possibility of {disease} disease consult with doctor. Follow these diet plans to stay healthy"
+    inp = f"{dis_line}\n{diet_plan_summary}\n\n Foods to include: {foods}\n\n Foods to avoid: {foods_avoid}"
     txt = get_llm_response_no_context(query=beautify_text_prompt(inp), llm=llm)
     return txt
-    # except:
-        # return "We are facing some issues. Please try again after sometime."
 
 
 def get_no_llm_response():
@@ -118,6 +116,6 @@ def chatbot_response(user_input, llm, option):
         query = "The user has a {user_input} disease. Can you suggest some diet plans for this disease?".format(user_input=user_input)
         prompt = get_diet_plan_prompt()
         llm_response = get_llm_response(raw_prompt=prompt, query=query, retriever=retriever, llm=llm)
-        # llm_response = get_no_llm_response()
-        resp = create_plan_text(llm_response, llm) 
+        # llm_response = get_no_llm_response() 
+        resp = create_plan_text(user_input, llm_response, llm) 
     return resp
