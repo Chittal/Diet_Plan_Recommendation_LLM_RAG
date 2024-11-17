@@ -1,9 +1,13 @@
 # Diet Plan Recommendation For Chronic Health Conditions using LLM and RAG
 This project is an AI based chatbot for diet plan recommendation created to detect and manage chronic health conditions mainly focusing on Thyroid, Diabetes and Heart disease. This Flask application has three pages Home, Chatbot and About us page.
 ## System Overview
+### Home page
 ![Home page](static/screenshots/Screenshot%202024-11-16%20210715.png)
+### Chatbot page (Disease known)
 ![Chatbot page (Disease known)](static/screenshots/Screenshot%202024-11-16%20210819.png)
+### Chatbot page (Symptoms known)
 ![Chatbot page (Symptoms known)](static/screenshots/Screenshot%202024-11-16%20211100.png)
+### About us
 ![About us page](static/screenshots/Screenshot%202024-11-16%20210949.png)
 ## Input
 The input is symptom or disease. Predict the chronic health conditions if any based on symptoms/disease provided and suggest diet plans for user. 
