@@ -85,11 +85,12 @@
 
         .chat-container {
             display: flex;
+            height: calc(100vh - 40px);
             flex-direction: column;
             justify-content: space-between;
             width: 100%;
             /* max-width: 1000px; Maximum width to limit the size on larger screens */
-            height: 590px;
+            /* height: 590px; */
             border-radius: 0;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             background-color: white;
@@ -283,10 +284,10 @@
     
     <script>
         let selectedOption = "";
-        const contentDiv = document.getElementById('chatbox');
+        //const contentDiv = document.getElementById('chatbox');
 
         // Replace text surrounded by ** with <b> tags
-        contentDiv.innerHTML = contentDiv.innerHTML.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        //contentDiv.innerHTML = contentDiv.innerHTML.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
         function showTypingIndicator() {
             // Remove any existing typing indicator
             $('#typing-indicator').remove();
@@ -318,6 +319,9 @@
                     <button class="question-response-btn-no" data-value="No">No</button>
                 </div>
             `);
+        }
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
         }
         $(document).ready(function() {
             function scrollToBottom() {
@@ -380,7 +384,7 @@
                 // let height = $('#height').val();
     
                 // $('#chatbox').append('<div class="message user">Condition: ' + condition + ', Age: ' + age + ', Weight: ' + weight + 'kg, Height: ' + height + 'cm</div>');
-                $('#chatbox').append('<div class="message user">Condition: ' + condition + '.</div>');
+                $('#chatbox').append('<div class="message user">Condition: ' + capitalizeFirstLetter(condition) + '.</div>');
     
                 // Optionally, you can send the data to the server if needed
                 showTypingIndicator();
@@ -393,7 +397,7 @@
                     },
                     success: function(data) {
                         hideTypingIndicator();
-                        var formattedResponse = data.response.replace(/\n/g, '<br>');
+                        var formattedResponse = data.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
                         $('#chatbox').append('<div class="message bot">' + formattedResponse + '</div>');
                         if (data.status === 200) {
                             anyOtherQuestionButton();

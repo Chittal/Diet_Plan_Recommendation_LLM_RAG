@@ -1,14 +1,14 @@
 import os
 import psycopg2
 
-username = os.getenv('POSTGRES_USERNAME')
-password = os.getenv('POSTGRES_PASSWORD')
-host = os.getenv('POSTGRES_HOST')
-port = int(os.getenv('POSTGRES_PORT'))
-database = os.getenv('POSTGRES_DATABASE')
-tablename = 'foundation_food_nutrient'
 
 def get_nutrients_data(nutrient_list):
+    username = os.getenv('POSTGRES_USERNAME')
+    password = os.getenv('POSTGRES_PASSWORD')
+    host = os.getenv('POSTGRES_HOST')
+    port = int(os.getenv('POSTGRES_PORT'))
+    database = os.getenv('POSTGRES_DATABASE')
+    tablename = 'foundation_food_nutrient'
     # Establishing the connection to the PostgreSQL database
     conn = psycopg2.connect(
         dbname=database, 

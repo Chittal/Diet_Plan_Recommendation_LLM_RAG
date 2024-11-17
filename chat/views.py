@@ -63,7 +63,7 @@ def plan_query_prompt():
 def beautify_text_prompt(input):
     prompt = f"""Please enhance and refine the input below for clarity, style, and flow. Focus on improving readability, making it more engaging, and ensuring it maintains a professional and polished tone. 
     Include only unique foods in the list of recommended foods. 
-    Surround titles/bold text in <strong></strong> instead of **. Do not add any unrelated content, tags, or strings. Respond directly with the output. 
+    Surround titles/bold text in <strong></strong> instead of **. Do not add any unrelated content, symbols, tags, or strings. Respond directly with the output. 
     Below is the input text:
     {input}"""
     return prompt
@@ -97,7 +97,7 @@ def create_plan_text(disease, resp, llm):
     foods_avoid = get_foods_to_avoid(data)
     foods = get_food_recommended(data)
     dis_line = f"You have possibility of {disease} disease consult with doctor. Follow these diet plans to stay healthy"
-    inp = f"**{disease} Diet plan Recommendation**\n{dis_line}\n{diet_plan_summary}\n\n Foods to include: {foods}\n\n Foods to avoid: {foods_avoid}"
+    inp = f"{disease} Disease Diet plan Recommendation\n{dis_line}\n{diet_plan_summary}\n\n Foods to include: {foods}\n\n Foods to avoid: {foods_avoid}"
     txt = get_llm_response_no_context(query=beautify_text_prompt(inp), llm=llm)
     return txt
 
@@ -114,6 +114,7 @@ def chatbot_response(user_input, llm, option):
         # resp = get_no_llm_response()
     else:
         query = "The user has a {user_input} disease. Can you suggest some diet plans for this disease?".format(user_input=user_input)
+        print(query)
         prompt = get_diet_plan_prompt()
         llm_response = get_llm_response(raw_prompt=prompt, query=query, retriever=retriever, llm=llm)
         # llm_response = get_no_llm_response() 

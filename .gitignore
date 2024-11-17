@@ -4,4 +4,3 @@ venv/
 .venv/
 .env
 storage/
-data/
