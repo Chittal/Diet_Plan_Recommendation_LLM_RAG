@@ -54,8 +54,6 @@ def chatbot():
 
 @app.route('/aboutus')
 def aboutus():
-    chat_history = []
-    session["chat_history"] = chat_history
     return render_template('aboutus.html')
 
 
@@ -72,7 +70,7 @@ def get_response():
                 return jsonify({"status": 400, "response": user_input})
         else:
             condition = request.form.get('condition')
-            if option == 'disease':
+            if option == 'Disease':
                 disease = condition
                 print("DISEASE:", disease)
                 response = chatbot_response(disease, llm, option)

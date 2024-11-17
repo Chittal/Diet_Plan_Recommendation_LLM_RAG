@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Interface</title>
+    <title>NutriBuddy - Chatbot</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
@@ -194,14 +194,15 @@
             60% { content: '...'; }
             80%, 100% { content: ''; }
         }
-        .button-container, .another-plan-button-container, .question-button-container {
+        .button-container, .another-plan-button-container, .question-button-container, .disease-button-container {
             display: flex;
             gap: 15px;
             /* justify-content: center; */
+            justify-content: flex-end;
             margin-top: 20px;
         }
 
-        .response-btn, .another-plan-response-btn-yes, .another-plan-response-btn-no, .question-response-btn-yes, .question-response-btn-no {
+        .response-btn, .another-plan-response-btn-yes, .another-plan-response-btn-no, .question-response-btn-yes, .question-response-btn-no, .disease-btn {
             padding: 15px 25px;
             font-size: 16px;
             font-weight: bold;
@@ -368,11 +369,55 @@
             $('.response-btn').on('click', function() {
                 selectedOption = $(this).data('value');
                 $('#chatbox').append('<div class="message user">' + selectedOption + '</div>');
-                $('#chatbox').append('<div class="message bot">Please enter the ' + selectedOption + '.</div>')
-                // $('#chatbox').append('<div class="message bot">Please enter the ' + selectedOption + ' along with your age, weight, and height.</div>')
+                if (selectedOption === 'Disease') {
+                    $('#chatbox').append('<div class="message bot">Please select a specific disease.</div>')
+                    const diseaseButtons = `
+                        <div class="disease-button-container">
+                            <button class="disease-btn" data-value="Diabetes">Diabetes</button>
+                            <button class="disease-btn" data-value="Thyroid">Thyroid</button>
+                            <button class="disease-btn" data-value="Heart">Heart Disease</button>
+                        </div>`;
+                    $('#chatbox').append(diseaseButtons);
+                } else {
+                    $('#chatbox').append('<div class="message bot">Please enter the ' + selectedOption + '.</div>')
+                    $('#infoForm').show(); // Show input form for condition, age, weight, height
+                }
                 $('.button-container').hide(); // Hide buttons after selection
-                $('#infoForm').show(); // Show input form for condition, age, weight, height
                 scrollToBottom(); // Scroll chatbox to the bottom
+            });
+            $('#chatbox').on('click', '.disease-btn', function() {
+                $('.disease-button-container').hide();
+                const disease = $(this).data('value');
+                $('#chatbox').append('<div class="message user">' + disease + '</div>');
+                showTypingIndicator();
+                scrollToBottom();
+
+                // Call API with the selected disease
+                $.ajax({
+                    url: '/get_response',
+                    type: 'POST',
+                    data: {
+                        option: 'Disease',
+                        condition: disease,
+                    },
+                    success: function(data) {
+                        hideTypingIndicator();
+                        var formattedResponse = data.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                        $('#chatbox').append('<div class="message bot">' + formattedResponse + '</div>');
+                        if (data.status === 200) {
+                            anyOtherQuestionButton();
+                        } else {
+                            showAnotherPlanButton();
+                        }
+                        scrollToBottom();
+                    },
+                    error: function() {
+                        hideTypingIndicator();
+                        $('#chatbox').append('<div class="message bot">An error occurred. Please try again.</div>');
+                        showAnotherPlanButton();
+                        scrollToBottom();
+                    }
+                });
             });
             // Handle form submission for condition, age, weight, height
             $('#infoForm').on('submit', function(event) {
@@ -384,7 +429,7 @@
                 // let height = $('#height').val();
     
                 // $('#chatbox').append('<div class="message user">Condition: ' + condition + ', Age: ' + age + ', Weight: ' + weight + 'kg, Height: ' + height + 'cm</div>');
-                $('#chatbox').append('<div class="message user">Condition: ' + capitalizeFirstLetter(condition) + '.</div>');
+                $('#chatbox').append('<div class="message user">' + capitalizeFirstLetter(condition) + '.</div>');
     
                 // Optionally, you can send the data to the server if needed
                 showTypingIndicator();
@@ -434,8 +479,9 @@
                     type: 'POST',
                     data: { option: selectedOption, message: userMessage },
                     success: function(data) {
+                        var formattedResponse = data.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
                         hideTypingIndicator();
-                        $('#chatbox').append('<div class="message bot">' + data.response + '</div>');
+                        $('#chatbox').append('<div class="message bot">' + formattedResponse + '</div>');
                         if (data.status === 200) {
                             anyOtherQuestionButton();
                         } else {

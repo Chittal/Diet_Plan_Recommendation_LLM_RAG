@@ -116,16 +116,45 @@ def delete_collection(collection_name):
         print(f"An error occurred while deleting the collection: {e}")
 
 
+# def create_index(name):
+#     db = get_db()
+#     chroma_collection = db.get_or_create_collection(name)
+#     documents = SimpleDirectoryReader("data/" + name, recursive=True).load_data()
+#     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+#     storage_context = StorageContext.from_defaults(vector_store=vector_store)
+#     Settings.embed_model = get_embedding()
+#     index = VectorStoreIndex.from_documents(documents, storage_context=storage_context, show_progress=True)
+#     retriever = index.as_retriever()
+#     return retriever
+
+
 def create_index(name):
     db = get_db()
-    chroma_collection = db.get_or_create_collection(name)
+    collection = db.get_or_create_collection(name)
+    embed_model = get_embedding()
     documents = SimpleDirectoryReader("data/" + name, recursive=True).load_data()
-    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
-    Settings.embed_model = get_embedding()
-    index = VectorStoreIndex.from_documents(documents, storage_context=storage_context, show_progress=True)
-    retriever = index.as_retriever()
-    return retriever
+    for doc in documents:
+        # Embed the document content
+        embedding = embed_model.embed_documents([doc.text])  # Assuming `embed()` returns an embedding for the content
+         # Add the folder name to the metadata
+        doc_metadata = doc.metadata.copy() if doc.metadata else {}
+        folder_name = os.path.basename(os.path.dirname(doc_metadata['file_path']))
+        doc_metadata['folder'] = os.path.basename(folder_name) 
+        # print("folder anme", folder_name)
+        
+        # Add document and its embedding to the collection
+        collection.add(
+            documents=[doc.text],               # Content of the document
+            metadatas=doc_metadata,                # Metadata if available
+            ids=[doc.id_],                          # Unique ID for each document
+            embeddings=embedding                   # Embedded representation of the document
+        )
+    
+    # Create retriever with embeddings included
+    # retriever = collection.as_retriever()
+    # return retriever
+    # return retrieve_index(name)
+    return collection
 
 
 def retrieve_index(name):
@@ -134,8 +163,24 @@ def retrieve_index(name):
     retriever = vector_store.as_retriever(
         search_type="similarity_score_threshold",
         search_kwargs={
-            "k": 20,
+            "k": 10,
             "score_threshold": 0.1,
+        },
+    )
+    return retriever
+
+
+def retrieve_index_with_folder(name, folder):
+    vector_store = Chroma(persist_directory='storage/chroma', embedding_function=get_embedding(), collection_name=name)
+    print("Creating chain with collection")
+    retriever = vector_store.as_retriever(
+        search_type="similarity_score_threshold",
+        search_kwargs={
+            "filter": {
+                "folder": folder
+            },
+            "k": 10,
+            "score_threshold": 0.3,
         },
     )
     return retriever
@@ -160,3 +205,24 @@ if __name__ == '__main__':
     create_collection('disease')
     create_collection('diet_plan')
     list_all_collections()
+    # db = get_db()
+    # collection = db.get_collection("diet_plan")
+    # # # Fetch all metadata
+    # # data = collection.get(include=["metadatas"])
+
+    # # # Extract and print filenames from metadata
+    # # for metadata in data["metadatas"]:
+    # #     print(metadata.keys())
+    # #     print(metadata["file_path"])
+    # #     if "file_name" in metadata:  # Check if 'filename' is a key in metadata
+    # #         print(metadata["file_name"])
+    # #     else:
+    # #         print("No filename found in this metadata:", metadata)
+    # retriever = retrieve_index('diet_plan')
+    # # Example query using the filtered retriever
+    # results = retriever.invoke("What is the diet plan for Hypothyroidism?")
+
+    # # Print results
+    # for doc in results:
+    #     print(f"Content: {doc.page_content}")
+    #     print(f"Metadata: {doc.metadata}")

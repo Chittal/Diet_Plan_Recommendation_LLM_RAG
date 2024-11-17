@@ -6,7 +6,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from chat.llama3 import get_llm_response, get_llm_response_history_aware, get_llm_response_no_context
-from vectordb_code.vectorstore import retrieve_index
+from vectordb_code.vectorstore import retrieve_index_with_folder, retrieve_index
 from postgres.views import get_nutrients_data
 
 
@@ -14,7 +14,7 @@ def get_diet_plan_prompt():
     raw_prompt = PromptTemplate.from_template(
         """ 
         You are a diet plan recommendation AI assistant. Question is enclosed in <input>{input}</input>
-        Use context only to generate your output from. The context is enclosed in <context>{context}</context>
+        Important: Use context only to generate your output from. The context is enclosed in <context>{context}</context>
 
         Output: 
         Your output should be in JSON format containg following elements with specified key.
@@ -107,12 +107,13 @@ def get_no_llm_response():
 
 
 def chatbot_response(user_input, llm, option):
-    retriever = retrieve_index(name='diet_plan')
     if option == "plan_query":
+        retriever = retrieve_index(name='diet_plan')
         prompt = plan_query_prompt()
         resp = get_llm_response_history_aware(raw_prompt=prompt, query=user_input, retriever=retriever, llm=llm)
         # resp = get_no_llm_response()
     else:
+        retriever = retrieve_index_with_folder(name='diet_plan', folder=user_input)
         query = "The user has a {user_input} disease. Can you suggest some diet plans for this disease?".format(user_input=user_input)
         print(query)
         prompt = get_diet_plan_prompt()
