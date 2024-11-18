@@ -26,21 +26,25 @@ We have create a Flask app. This project is implemented using open source LLM an
 
 ## Steps to run this project in Windows
 Follow the below steps to run this project. 
-1. Install Python 3.11 and Postgres SQL.
-2. Open terminal inside project folder. Create virtual environment using below command.
+1. Install Python 3.11, Ollama, and Postgres SQL.
+2. Open terminal and execute command to download ollama 3.1 8b.
+```
+ollama run llama3.1:8b
+```
+3. Open terminal inside project folder. Create virtual environment using below command.
 ```
 python -m venv venv
 ```
-3. Activate virtual environment once it is created.
+4. Activate virtual environment once it is created.
 ```
 venv\Scripts\activate
 ```
-4. Install all the requirements using below command.
+5. Install all the requirements using below command.
 ```
 pip install -r requirements.txt
 ```
-5. Create database with name 'food_data' in postgres.
-6. Create .env file with below values inside the main repository.
+6. Create database with name 'food_data' in postgres. 
+7. Create .env file with below values inside the main repository.
 ```
 SECRET_KEY
 POSTGRES_USERNAME
@@ -49,15 +53,15 @@ POSTGRES_HOST
 POSTGRES_PORT
 POSTGRES_DATABASE=food_data
 ```
-7. Run the below command to populate foundation food data to database.
+8. Run the below command to populate foundation food data to database.
 ```
-python populate_food_data.py
+python populate_postgres.py
 ```
-8. Create vector database with two collections for disease and diet_plan using below command. It will create vector DB collections in storage/ folder.
+9. Create vector database with two collections for disease and diet_plan using below command. It will create vector DB collections in storage/ folder.
 ```
 python vectordb_code/vectorstore.py
 ```
-8. Now, start the flask application using below command.
+10. Now, start the flask application using below command.
 ```
 python app.py
 ```
