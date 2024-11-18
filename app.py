@@ -8,9 +8,9 @@ from dotenv import load_dotenv
 from langchain_community.llms import Ollama
 from flask import Flask, render_template, request, jsonify, session, g
 
-from chat.views import chatbot_response
-from vectordb_code.vectorstore import create_collection
-from vectordb_code.views import find_disease
+from chat.views import chatbot_response, find_disease
+# from vectordb_code.vectorstore import create_collection
+# from vectordb_code.views import find_disease
 from chat.validate_input import validate_symptoms, check_questions
 # from huggingface_hub import login
 
@@ -57,6 +57,20 @@ def aboutus():
     return render_template('aboutus.html')
 
 
+@app.route('/get_disease_response', methods=['POST'])
+def get_disease_response():
+    try:
+        option = request.form.get('option')
+        condition = request.form.get('condition')
+        status, disease = find_disease(condition, llm)
+        print("DISEASE:", disease)
+        if status != 200:
+            return jsonify({"status": 400, "response": "As per our data, you don't have any health conditions to worry about. Focus on a balanced diet with fruits, vegetables, whole grains, lean proteins, and adequate hydration to maintain overall wellness."})
+        return jsonify({'status': 200, 'response': disease})
+    except:
+        return jsonify({"status": 400, "response": "We are facing some issues. Please try again after sometime."})
+
+
 @app.route('/get_response', methods=['POST'])
 def get_response():
     try:
@@ -70,19 +84,9 @@ def get_response():
                 return jsonify({"status": 400, "response": user_input})
         else:
             condition = request.form.get('condition')
-            if option == 'Disease':
-                disease = condition
-                print("DISEASE:", disease)
-                response = chatbot_response(disease, llm, option)
-            else:
-                # disease = find_disease(age, height, weight, condition)
-                status, symptoms_resp = validate_symptoms(condition)
-                if status == 200:
-                    disease = find_disease(symptoms_resp)
-                    print("DISEASE:", disease)
-                    response = chatbot_response(disease, llm, option)
-                else:
-                    return jsonify({"status": 400, "response": symptoms_resp})
+            disease = condition
+            print("DISEASE:", disease)
+            response = chatbot_response(disease, llm, option)
         return jsonify({'status': 200, 'response': response})
     except:
         return jsonify({"status": 400, "response": "We are facing some issues. Please try again after sometime."})

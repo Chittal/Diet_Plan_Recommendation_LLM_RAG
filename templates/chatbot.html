@@ -215,7 +215,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .response-btn:hover, .another-plan-response-btn-yes:hover, .another-plan-response-btn-no:hover, .question-response-btn-yes:hover, .question-response-btn-no:hover {
+        .response-btn:hover, .another-plan-response-btn-yes:hover, .another-plan-response-btn-no:hover, .question-response-btn-yes:hover, .question-response-btn-no:hover, .disease-btn:hover {
             background-color: #555;
             transform: translateY(-3px);
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
@@ -434,7 +434,7 @@
                 // Optionally, you can send the data to the server if needed
                 showTypingIndicator();
                 $.ajax({
-                    url: '/get_response',
+                    url: '/get_disease_response',
                     type: 'POST',
                     data: {
                         option: selectedOption,
@@ -442,14 +442,41 @@
                     },
                     success: function(data) {
                         hideTypingIndicator();
-                        var formattedResponse = data.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-                        $('#chatbox').append('<div class="message bot">' + formattedResponse + '</div>');
+                        var formattedResponse = data.response;
                         if (data.status === 200) {
-                            anyOtherQuestionButton();
+                            $('#chatbox').append('<div class="message bot">You have possibility of ' + formattedResponse + ' disease.</div>');
+                            showTypingIndicator();
+                            $.ajax({
+                                url: '/get_response',
+                                type: 'POST',
+                                data: {
+                                    option: selectedOption,
+                                    condition: formattedResponse,
+                                },
+                                success: function(data) {
+                                    hideTypingIndicator();
+                                    var formattedResponse = data.response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                                    $('#chatbox').append('<div class="message bot">' + formattedResponse + '</div>');
+                                    if (data.status === 200) {
+                                        anyOtherQuestionButton();
+                                    } else {
+                                        showAnotherPlanButton();
+                                    }
+                                    scrollToBottom();
+                                },
+                                error: function() {
+                                    hideTypingIndicator();
+                                    $('#chatbox').append('<div class="message bot">An error occurred. Please try again.</div>');
+                                    showAnotherPlanButton();
+                                    scrollToBottom();
+                                }
+                            });
                         } else {
+                            $('#chatbox').append('<div class="message bot">' + formattedResponse + '</div>');
+                            hideTypingIndicator();
                             showAnotherPlanButton();
+                            scrollToBottom();
                         }
-                        scrollToBottom();
                     },
                     error: function() {
                         hideTypingIndicator();

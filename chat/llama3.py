@@ -59,12 +59,14 @@ def get_llm_response_history_aware(raw_prompt, query, retriever, llm):
     session.modified = True
 
     sources = []
-    # for doc in result["context"]:
-    #     sources.append(
-    #         {"source": doc.metadata["source"], "page_content": doc.page_content}
-    #     )
+    for doc in result["context"]:
+        sources.append(
+            {"source": doc.metadata["file_name"], "page_content": doc.page_content}
+        )
 
     response_answer = {"answer": result["answer"], "sources": sources}
+    with open('response.json', 'w') as file:
+        json.dump(response_answer, file, indent=4)
     return response_answer["answer"]
 
 
@@ -100,8 +102,8 @@ def get_llm_response(raw_prompt, query, retriever, llm):
     response_answer = {"answer": result["answer"], "sources": sources}
     # print("================================================")
     # print(response_answer)
-    # with open('response.json', 'w') as file:
-    #     json.dump(response_answer, file, indent=4)
+    with open('response.json', 'w') as file:
+        json.dump(response_answer, file, indent=4)
     return response_answer["answer"]
 
 

@@ -47,6 +47,25 @@ def get_diet_plan_prompt():
     return raw_prompt
 
 
+def get_disease_prompt():
+    raw_prompt = PromptTemplate.from_template(
+        """ 
+        You are a chronic disease prediction AI assistant. Your task is to predict whether the user has one of the following conditions using context provided: 'Thyroid', 'Heart disease', 'Diabetes', or 'None', based on symptoms.
+        Question is enclosed in <input>{input}</input>
+        Use context only to generate your output. The context is enclosed in <context>{context}</context>
+
+        Output:
+        Respond with a single word indicating the condition: one of 'Thyroid', 'Heart', 'Diabetes', or 'None'.
+        If the user does not have any of these diseases or there is no context, always respond with 'None'.
+        
+        Important:
+        - Do not infer or assume information that is not explicitly stated in the context.
+        - Respond directly with the output, without any additional text, explanations, or introductions.
+        """
+    )
+    return raw_prompt
+
+
 def plan_query_prompt():
     raw_prompt = ChatPromptTemplate.from_messages(
         [
@@ -61,11 +80,12 @@ def plan_query_prompt():
 
 
 def beautify_text_prompt(input):
-    prompt = f"""Please enhance and refine the input below for clarity, style, and flow. Focus on improving readability, making it more engaging, and ensuring it maintains a professional and polished tone. 
+    prompt = f"""Please enhance and refine the input below for clarity, style, and flow. Focus on improving readability, making it more engaging, and ensuring it maintains a professional and polished tone. Do not change the meaning of sentences.
     Include only unique foods in the list of recommended foods. 
-    Surround titles/bold text in <strong></strong> instead of **. Do not add any unrelated content, symbols, tags, or strings. Respond directly with the output. 
+    Surround titles/bold text in <strong></strong> instead of **. Do not add any unrelated content, symbols, tags, or strings. Respond directly with the output, without any additional text, explanations, or introductions.
     Below is the input text:
-    {input}"""
+    {input}
+    """
     return prompt
 
 
@@ -104,6 +124,25 @@ def create_plan_text(disease, resp, llm):
 
 def get_no_llm_response():
     return '{"nutrients_recommended": [{"nutrient": "protein", "amount": "10", "unit": "g"}, {"nutrient": "carbohydrate", "amount": "20", "unit": "g"}], "diet_plan_summary": "Reduce carbohydrate intake for individuals with Type 2 Diabetes (T2D) has been shown to improve blood glucose. Emphasize consumption of non-starchy vegetables, minimal added sugars, fruits, whole grains, and dairy products.", "foods_avoid": ["Sugar", "Starchy food"]}'
+
+
+def get_disease(llm_response):
+    try:
+        if llm_response in ["Thyroid", "Heart", "Diabetes"]:
+            return 200, llm_response
+        else:
+            return 400, None
+    except:
+        return 400, None
+
+
+def find_disease(query, llm):
+    # query = "I have {symptoms}. What disease might I have?".format(symptoms=symptoms)
+    retriever = retrieve_index(name='disease')
+    prompt = get_disease_prompt()
+    llm_response = get_llm_response(raw_prompt=prompt, query=query, retriever=retriever, llm=llm)
+    status, disease = get_disease(llm_response)
+    return status, disease
 
 
 def chatbot_response(user_input, llm, option):

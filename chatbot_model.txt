@@ -32,6 +32,10 @@ Then loop to 1
 13. Another diet plan - No
 Thank you!
 
+======================================
+Symptoms
+heart = Chest pain, angina, pain in heart muscle, shortness of breath.
+diabetes = 
 
 
 ======================================
@@ -50,8 +54,12 @@ Tasks
 10. Answer only followup questions related to diet plan -- DONE
 11. If error in validation, handle in app flow (frontend)
 12. Format response beautifully using LLM -- DONE
-13. Say to user "You have possibility of ____ disease consult with doctor. Follow these diet plans to stay healthy" in symptoms flow.
+13. Say to user "You have possibility of ____ disease consult with doctor. Follow these diet plans to stay healthy" in symptoms flow. -- DONE
 14. give unique recommended food, Beautify text output with bulletins and title in bold.
 
 
-11. Update text, button and chatbot tilte in app - UI
+11. Update text, button and chatbot tilte in app - UI -- DONE
+
+-> check sources if it is picking same set everytime I query disease
+-> It tries to summarze evrytime on its own
+-> If I ask specific question from doc, it should it say correctly( followup)

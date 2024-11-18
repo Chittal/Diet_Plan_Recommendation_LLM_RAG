@@ -194,7 +194,8 @@ def create_collection(name):
     except:
         if name == 'disease':
             print('creating disease')
-            create_collection_sentence_transormer(name)
+            # create_collection_sentence_transormer(name)
+            create_index(name)
             print("disease done")
         else:
             print('creating diet')
@@ -205,24 +206,4 @@ if __name__ == '__main__':
     create_collection('disease')
     create_collection('diet_plan')
     list_all_collections()
-    # db = get_db()
-    # collection = db.get_collection("diet_plan")
-    # # # Fetch all metadata
-    # # data = collection.get(include=["metadatas"])
 
-    # # # Extract and print filenames from metadata
-    # # for metadata in data["metadatas"]:
-    # #     print(metadata.keys())
-    # #     print(metadata["file_path"])
-    # #     if "file_name" in metadata:  # Check if 'filename' is a key in metadata
-    # #         print(metadata["file_name"])
-    # #     else:
-    # #         print("No filename found in this metadata:", metadata)
-    # retriever = retrieve_index('diet_plan')
-    # # Example query using the filtered retriever
-    # results = retriever.invoke("What is the diet plan for Hypothyroidism?")
-
-    # # Print results
-    # for doc in results:
-    #     print(f"Content: {doc.page_content}")
-    #     print(f"Metadata: {doc.metadata}")
