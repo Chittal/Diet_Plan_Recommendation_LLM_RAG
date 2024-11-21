@@ -132,7 +132,7 @@ def create_index(name):
     db = get_db()
     collection = db.get_or_create_collection(name)
     embed_model = get_embedding()
-    documents = SimpleDirectoryReader("data/" + name, recursive=True).load_data()
+    documents = SimpleDirectoryReader("./data/" + name, required_exts=['.pdf'], recursive=True).load_data() 
     for doc in documents:
         # Embed the document content
         embedding = embed_model.embed_documents([doc.text])  # Assuming `embed()` returns an embedding for the content

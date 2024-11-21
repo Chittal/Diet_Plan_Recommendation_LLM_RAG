@@ -27,23 +27,6 @@ def get_diet_plan_prompt():
         Important: Respond directly with the JSON output, without any additional text or introductions. Format the output as mentioned in sample output, including "nutrients_recommended", "diet_plan_summary", and "foods_avoid".
         """
     )
-    # raw_prompt = PromptTemplate.from_template(
-    #     """ 
-    #     You are a diet plan recommendation AI assistant. Question is enclosed in <input>{input}</input>
-    #     Use context only to generate your answer from. The context is enclosed in <context>{context}</context>
-
-    #     Output:
-    #     Provide a very detailed explanation of diet plan for user in big paragraph. Mention user's health condition in first line. Also, include recommended foods, foods to avoid, and specific nutrient levels.
-# Below is the sample output format enclosed in <sample_output>
-#         {{
-#             "nutrients_recommended": ["protein", "carbohydrate", "vitamin a", "vitamin d"],
-#             "diet_plan_summary": "Reduce carbohydrate intake for individuals with Type 2 Diabetes (T2D) has been shown to improve blood glucose. Emphasize consumption of non-starchy vegetables, minimal added sugars, fruits, whole grains, and dairy products.",
-#             "foods_avoid": ["sugar"]
-#         }}</sample_output>
-    #     Important: Respond directly with output, without any additional text or introductions..
-    #     """
-    # )
-    
     return raw_prompt
 
 
@@ -60,7 +43,7 @@ def get_disease_prompt():
         
         Important:
         - Do not infer or assume information that is not explicitly stated in the context.
-        - Respond directly with the output, without any additional text, explanations, or introductions.
+        - Respond directly with the output word, without any additional text, symbols, punctuations, explanations, or introductions.
         """
     )
     return raw_prompt
@@ -80,10 +63,14 @@ def plan_query_prompt():
 
 
 def beautify_text_prompt(input):
-    prompt = f"""Please enhance and refine the input below for clarity, style, and flow. Focus on improving readability, making it more engaging, and ensuring it maintains a professional and polished tone. Do not change the meaning of sentences.
-    Include only unique foods in the list of recommended foods. 
-    Surround titles/bold text in <strong></strong> instead of **. Do not add any unrelated content, symbols, tags, or strings. Respond directly with the output, without any additional text, explanations, or introductions.
-    Below is the input text:
+    prompt = f"""
+    Your task is to enhance and refine the input provided below for clarity, style, and flow. Focus on improving readability, and ensuring it maintains a professional and polished tone. 
+    - Do not change the meaning of sentences. Format the text in user understandable format.
+    - Include only unique foods in the list of recommended foods and avoid repetition across categories. 
+    - Surround titles/bold text in <strong></strong> instead of **. Add bold only when it is required.
+    - Ensure a clean, formatted, and structured layout. Do not add any unrelated content, symbols, tags, or strings. 
+    - Respond directly with the output, without any additional text, explanations, or introductions.
+    Input:
     {input}
     """
     return prompt
@@ -114,14 +101,14 @@ def get_food_recommended(data):
 def create_plan_text(disease, resp, llm):
     data = json.loads(resp)
     diet_plan_summary = data["diet_plan_summary"]
-    dis_line = f"You have possibility of {disease} disease consult with doctor. Follow these diet plans to stay healthy"
+    dis_line = f"If you have {disease} disease, it is essential to consult with your doctor. Follow these diet plans to stay healthy." 
     inp = f"{disease} Disease Diet plan Recommendation\n{dis_line}\n{diet_plan_summary}\n"
     foods = get_food_recommended(data)
     if foods:
-        inp += "\n Foods to include: {foods}"
+        inp += f"\n Foods to include: {foods}"
     foods_avoid = get_foods_to_avoid(data)
     if foods_avoid:
-        inp += "\n Foods to avoid: {foods_avoid}"
+        inp += f"\n Foods to avoid: {foods_avoid}"
     txt = get_llm_response_no_context(query=beautify_text_prompt(inp), llm=llm)
     return txt
 
