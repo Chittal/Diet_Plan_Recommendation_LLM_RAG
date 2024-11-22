@@ -102,8 +102,8 @@ def get_llm_response(raw_prompt, query, retriever, llm):
     response_answer = {"answer": result["answer"], "sources": sources}
     # print("================================================")
     # print(response_answer)
-    with open('response.json', 'w') as file:
-        json.dump(response_answer, file, indent=4)
+    # with open('response.json', 'w') as file:
+    #     json.dump(response_answer, file, indent=4)
     return response_answer["answer"]
 
 
